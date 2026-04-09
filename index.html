@@ -14,15 +14,17 @@
   --cream:#f8f4e6;--border:#e0d4c4;--bg:#eee9df;
   --sidebar:#fff;--card:#fafaf8;
   --text:#1a1208;--muted:#7a6f5e;--subtle:#b0a090;
+  --accent:#7a0000;--accent2:#5a0000;--accent-light:rgba(122,0,0,.07);
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
 /* ─── NAV ─── */
 .nav{
-  background:var(--red);color:#fff;height:56px;
+  background:var(--accent);color:#fff;height:56px;
   display:flex;align-items:center;padding:0 28px;gap:16px;
   position:sticky;top:0;z-index:200;
   box-shadow:0 2px 20px rgba(0,0,0,.3);
+  transition:background .3s;
 }
 .nav-logo{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;letter-spacing:6px}
 .nav-sep{width:1px;height:28px;background:rgba(255,255,255,.2)}
@@ -53,14 +55,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .fp::-webkit-scrollbar{width:4px}
 .fp::-webkit-scrollbar-track{background:#f5f0ea}
 .fp::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px}
-
 .fp-inner{padding:24px 20px;flex:1}
 
 /* Section labels */
 .slabel{
   font-size:9px;font-weight:700;letter-spacing:3.5px;
-  text-transform:uppercase;color:var(--red);
+  text-transform:uppercase;color:var(--accent);
   margin:24px 0 14px;display:flex;align-items:center;gap:10px;
+  transition:color .3s;
 }
 .slabel:first-child{margin-top:0}
 .slabel-icon{font-size:13px}
@@ -68,10 +70,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* Fields */
 .field{margin-bottom:13px}
-.field label{
-  display:block;font-size:10.5px;font-weight:600;
-  color:var(--muted);margin-bottom:6px;letter-spacing:.4px;
-}
+.field label{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.4px;}
 .field input{
   width:100%;padding:9px 12px;font-size:13px;
   font-family:'DM Sans',sans-serif;
@@ -80,10 +79,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   transition:border-color .15s,box-shadow .15s,background .15s;
   color:var(--text);
 }
-.field input:focus{
-  border-color:var(--red);background:#fff;
-  box-shadow:0 0 0 3px rgba(122,0,0,.07);
-}
+.field input:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-light);}
 .field input[type="date"]{color:var(--muted)}
 .field input[readonly]{background:#f0ece3;color:#888;cursor:default;border-style:dashed}
 
@@ -91,14 +87,60 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .certid-row{display:flex;gap:8px;align-items:flex-end}
 .certid-row .field{flex:1;margin-bottom:0}
 .btn-gen{
-  padding:9px 11px;border:1.5px solid var(--red);
-  background:transparent;color:var(--red);
+  padding:9px 11px;border:1.5px solid var(--accent);
+  background:transparent;color:var(--accent);
   border-radius:8px;font-size:10px;font-family:'DM Sans',sans-serif;
   font-weight:700;cursor:pointer;white-space:nowrap;
   letter-spacing:.5px;transition:all .15s;height:38px;
 }
 .btn-gen:hover{background:#fff0f0}
 .btn-gen.spinning{opacity:.5;cursor:wait}
+
+/* ─── COLOR THEME PICKER ─── */
+.color-picker-row{display:flex;gap:8px;margin-bottom:4px}
+.color-swatch{
+  flex:1;height:40px;border-radius:8px;border:2.5px solid transparent;
+  cursor:pointer;transition:all .18s;position:relative;
+  display:flex;align-items:center;justify-content:center;
+  font-size:9px;font-weight:700;letter-spacing:1.5px;color:rgba(255,255,255,.85);
+  text-transform:uppercase;font-family:'DM Sans',sans-serif;
+}
+.color-swatch.active{border-color:#fff;box-shadow:0 0 0 3px rgba(0,0,0,.18),0 2px 12px rgba(0,0,0,.25);transform:translateY(-1px);}
+.color-swatch:hover:not(.active){transform:translateY(-1px);box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.swatch-red{background:linear-gradient(135deg,#8a0000,#5a0000)}
+.swatch-green{background:linear-gradient(135deg,#1b6e2a,#0f4d1c)}
+.swatch-gold{background:linear-gradient(135deg,#a07800,#7a5500)}
+
+/* ─── STAMP SECTION ─── */
+.stamp-row{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.stamp-toggle{
+  display:flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;color:var(--muted);
+  cursor:pointer;user-select:none;
+}
+.toggle-switch{
+  width:34px;height:18px;border-radius:9px;
+  background:#ccc;position:relative;transition:background .2s;cursor:pointer;
+  flex-shrink:0;
+}
+.toggle-switch.on{background:var(--accent)}
+.toggle-switch::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:14px;height:14px;border-radius:50%;background:#fff;
+  transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.3);
+}
+.toggle-switch.on::after{transform:translateX(16px)}
+
+.stamp-text-field{margin-bottom:12px}
+.stamp-type-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:4px}
+.stamp-type-btn{
+  padding:5px 11px;border-radius:6px;border:1.5px solid var(--border);
+  background:transparent;font-size:10px;font-weight:700;
+  font-family:'DM Sans',sans-serif;cursor:pointer;
+  letter-spacing:1px;color:var(--muted);transition:all .15s;
+}
+.stamp-type-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.stamp-type-btn:hover:not(.active){background:#f5f0ea}
 
 /* Auth gate */
 .auth-gate{
@@ -122,8 +164,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .auth-gate .field input.correct{border-color:#388e3c;background:#f1f8e9}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .auth-hint{font-size:10.5px;color:#aaa;margin-top:8px;text-align:center;line-height:1.6;font-family:'DM Sans',sans-serif}
-
-/* Cert ID hint */
 #certid-hint{font-size:10.5px;color:#aaa;margin-top:5px;margin-bottom:8px;letter-spacing:.2px;line-height:1.5}
 
 /* ─── ACTIONS FOOTER ─── */
@@ -138,63 +178,33 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   font-weight:600;cursor:pointer;letter-spacing:.4px;
   transition:all .15s;text-align:center;
 }
-.btn-pri{
-  background:var(--red);color:#fff;
-  box-shadow:0 2px 10px rgba(122,0,0,.25);
-}
-.btn-pri:hover:not(:disabled){
-  background:var(--red2);
-  box-shadow:0 4px 16px rgba(122,0,0,.35);
-  transform:translateY(-1px);
-}
+.btn-pri{background:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2);}
+.btn-pri:hover:not(:disabled){background:var(--accent2);box-shadow:0 4px 16px rgba(0,0,0,.3);transform:translateY(-1px);}
 .btn-pri:disabled{background:#ccc;cursor:not-allowed;box-shadow:none;color:#888}
-.btn-out{
-  background:transparent;color:var(--red);
-  border:1.5px solid var(--red);
-}
-.btn-out:hover{background:#fff5f5}
-
-/* Download button row */
+.btn-out{background:transparent;color:var(--accent);border:1.5px solid var(--accent);}
+.btn-out:hover{background:rgba(0,0,0,.03)}
 .dl-row{display:flex;gap:6px}
 .dl-row .btn-out{flex:1;font-size:11.5px;padding:9px 8px}
-
-.smsg{
-  font-size:11.5px;font-family:'DM Sans',sans-serif;
-  padding:10px 13px;border-radius:8px;
-  display:none;line-height:1.6;
-}
+.smsg{font-size:11.5px;font-family:'DM Sans',sans-serif;padding:10px 13px;border-radius:8px;display:none;line-height:1.6;}
 .smsg.ok{background:#e8f5e9;color:#2e7d32;display:block;border:1px solid #a5d6a7}
 .smsg.err{background:#ffebee;color:#b71c1c;display:block;border:1px solid #ef9a9a}
 .smsg.load{background:#fff8e1;color:#e65100;display:block;border:1px solid #ffcc80}
 
 /* ─── PREVIEW PANEL ─── */
-.prev{
-  flex:1;overflow:auto;padding:28px;
-  display:flex;flex-direction:column;align-items:center;gap:16px;
-  background:var(--bg);
-}
+.prev{flex:1;overflow:auto;padding:28px;display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg);}
 .prev-topbar{display:flex;align-items:center;gap:12px;width:100%;max-width:1000px}
 .prev-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;font-weight:700}
-.prev-badge{
-  font-size:9px;background:rgba(122,0,0,.1);color:var(--red);
-  padding:3px 11px;border-radius:12px;letter-spacing:1.5px;font-weight:700;
-}
-.cert-wrap{
-  background:#fff;border-radius:8px;
-  box-shadow:0 8px 48px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.06);
-  width:100%;max-width:1000px;overflow:hidden;
-}
-.cert-wrap svg,
-.cert-wrap > div > svg{width:100%;height:auto;display:block}
+.prev-badge{font-size:9px;background:rgba(122,0,0,.1);color:var(--accent);padding:3px 11px;border-radius:12px;letter-spacing:1.5px;font-weight:700;}
+.cert-wrap{background:#fff;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.06);width:100%;max-width:1000px;overflow:hidden;}
+.cert-wrap svg,.cert-wrap > div > svg{width:100%;height:auto;display:block}
 .prev-hint{font-size:11px;color:#bbb;letter-spacing:.5px;margin-top:2px}
-
 #qr-gen{position:fixed;left:-9999px;top:-9999px;width:300px;height:300px}
 </style>
 </head>
 <body>
 <div id="qr-gen"></div>
 
-<nav class="nav">
+<nav class="nav" id="main-nav">
   <span class="nav-logo">GOV-MC</span>
   <div class="nav-sep"></div>
   <span class="nav-sub">Certificate Issuance</span>
@@ -207,6 +217,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <!-- ── FORM PANEL ── -->
   <div class="fp">
     <div class="fp-inner">
+
+      <!-- COLOR THEME -->
+      <div class="slabel"><span class="slabel-icon">🎨</span> Certificate Theme</div>
+      <div class="color-picker-row">
+        <div class="color-swatch swatch-red active" id="sw-red" onclick="setTheme('red')" title="Official Red">RED</div>
+        <div class="color-swatch swatch-green" id="sw-green" onclick="setTheme('green')" title="Emerald Green">GREEN</div>
+        <div class="color-swatch swatch-gold" id="sw-gold" onclick="setTheme('gold')" title="Prestige Gold">GOLD</div>
+      </div>
+
+      <!-- STAMP -->
+      <div class="slabel" style="margin-top:20px"><span class="slabel-icon">🔏</span> Certificate Stamp</div>
+      <div class="stamp-row">
+        <div class="toggle-switch" id="stamp-toggle" onclick="toggleStamp()"></div>
+        <span class="stamp-toggle">Show Stamp on Certificate</span>
+      </div>
+      <div id="stamp-options" style="display:none">
+        <div class="stamp-type-row">
+          <button class="stamp-type-btn active" onclick="setStampText('ACTIVE')">ACTIVE</button>
+          <button class="stamp-type-btn" onclick="setStampText('VERIFIED')">VERIFIED</button>
+          <button class="stamp-type-btn" onclick="setStampText('ISSUED')">ISSUED</button>
+          <button class="stamp-type-btn" onclick="setStampText('APPROVED')">APPROVED</button>
+          <button class="stamp-type-btn" onclick="setStampText('LISTED')">LISTED</button>
+        </div>
+        <div class="field stamp-text-field" style="margin-top:8px">
+          <label>Custom Stamp Text</label>
+          <input type="text" id="f-stamptext" value="ACTIVE" maxlength="12" oninput="updatePreview()" placeholder="e.g. APPROVED">
+        </div>
+      </div>
 
       <div class="slabel"><span class="slabel-icon">🏢</span> Corporation</div>
       <div class="field">
@@ -237,7 +275,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         <button class="btn-gen" id="btn-gen" onclick="autoGenCertId()" title="Auto-generate next ID">↻ Auto</button>
       </div>
       <div id="certid-hint"></div>
-
       <div class="field">
         <label>Date Issued</label>
         <input type="date" id="f-date" oninput="updatePreview()">
@@ -278,14 +315,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   <div class="prev">
     <div class="prev-topbar">
       <span class="prev-title">📋 Live Preview</span>
-      <span class="prev-badge">REAL-TIME</span>
+      <span class="prev-badge" id="prev-badge">REAL-TIME</span>
     </div>
     <div class="cert-wrap"><div id="cert-container"></div></div>
     <div class="prev-hint">Fill in the form to update the certificate in real time</div>
   </div>
 </div>
 
-<!-- Firebase compat SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <script>
@@ -305,153 +341,130 @@ const db = firebase.database();
 var qrCache = null;
 var authUnlocked = false;
 var AUTH_CODE = '128627';
+var currentTheme = 'red';
+var stampEnabled = false;
+var stampText = 'ACTIVE';
 
-// ── QR VERIFY URL HELPER ──────────────────────────────────
-// Works for both GitHub Pages and local file hosting.
-// Replaces "govmc-issue.html" → "govmc-verify.html" in the current URL,
-// or if running locally just builds a relative URL.
+// ── THEME COLORS ──────────────────────────────────────────
+var THEMES = {
+  red:   { accent:'#7a0000', accent2:'#5a0000', accent3:'#9a1010', accentLight:'rgba(122,0,0,.07)',  navBg:'#7a0000', badgeBg:'rgba(122,0,0,.1)', svgAccent:'#7a0000' },
+  green: { accent:'#1a6b28', accent2:'#0f4d1c', accent3:'#257a34', accentLight:'rgba(26,107,40,.07)', navBg:'#1a6b28', badgeBg:'rgba(26,107,40,.1)', svgAccent:'#1a6b28' },
+  gold:  { accent:'#8a6800', accent2:'#6a4e00', accent3:'#a07800', accentLight:'rgba(138,104,0,.07)',  navBg:'#8a6800', badgeBg:'rgba(138,104,0,.1)', svgAccent:'#8a6800' },
+};
+
+function setTheme(t) {
+  currentTheme = t;
+  var th = THEMES[t];
+  var r = document.documentElement.style;
+  r.setProperty('--accent', th.accent);
+  r.setProperty('--accent2', th.accent2);
+  r.setProperty('--accent-light', th.accentLight);
+  document.getElementById('main-nav').style.background = th.navBg;
+  // Update active swatch
+  ['red','green','gold'].forEach(function(s) {
+    document.getElementById('sw-'+s).classList.toggle('active', s===t);
+  });
+  var badge = document.getElementById('prev-badge');
+  badge.style.background = th.badgeBg;
+  badge.style.color = th.accent;
+  updatePreview();
+}
+
+// ── STAMP ────────────────────────────────────────────────
+function toggleStamp() {
+  stampEnabled = !stampEnabled;
+  var tog = document.getElementById('stamp-toggle');
+  tog.classList.toggle('on', stampEnabled);
+  document.getElementById('stamp-options').style.display = stampEnabled ? 'block' : 'none';
+  updatePreview();
+}
+
+function setStampText(txt) {
+  stampText = txt;
+  document.getElementById('f-stamptext').value = txt;
+  document.querySelectorAll('.stamp-type-btn').forEach(function(b) {
+    b.classList.toggle('active', b.textContent === txt);
+  });
+  updatePreview();
+}
+
+// ── QR VERIFY URL ─────────────────────────────────────────
 function buildVerifyURL(certId) {
   var href = window.location.href;
-  // Replace the issue page name with the verify page name
   var base = href.replace(/govmc-issue\.html.*$/, '');
-  // If we couldn't strip the filename (e.g. bare directory), keep as-is
-  if (base === href) {
-    base = href.replace(/\?.*$/, '').replace(/\/$/, '') + '/';
-  }
+  if (base === href) base = href.replace(/\?.*$/, '').replace(/\/$/, '') + '/';
   return base + 'govmc-verify.html?id=' + encodeURIComponent(certId);
 }
 
-// ── AUTH CODE CHECK ───────────────────────────────────────
+// ── AUTH CODE ─────────────────────────────────────────────
 function checkAuthCode() {
-  var inp  = document.getElementById('f-authcode');
-  var hint = document.getElementById('auth-hint');
-  var btn  = document.getElementById('btn-save');
-  var val  = inp.value.trim();
-  if (val.length === 0) {
-    inp.className=''; hint.textContent='Required to save to the GOV-MC database.';
-    hint.style.color='#aaa'; authUnlocked=false;
-    btn.disabled=true; btn.textContent='🔒 Enter Code to Save'; return;
-  }
-  if (val === AUTH_CODE) {
-    inp.className='correct'; hint.textContent='✓ Authorization granted. You may now save.';
-    hint.style.color='#388e3c'; authUnlocked=true;
-    btn.disabled=false; btn.textContent='💾 Save & Generate QR Code';
-  } else if (val.length === AUTH_CODE.length) {
-    inp.className='wrong'; hint.textContent='✗ Incorrect code. Access denied.';
-    hint.style.color='#c62828'; authUnlocked=false;
-    btn.disabled=true; btn.textContent='🔒 Incorrect Code';
-  } else {
-    inp.className=''; hint.textContent='Required to save to the GOV-MC database.';
-    hint.style.color='#aaa'; authUnlocked=false;
-    btn.disabled=true; btn.textContent='🔒 Enter Code to Save';
-  }
+  var inp=document.getElementById('f-authcode'), hint=document.getElementById('auth-hint');
+  var btn=document.getElementById('btn-save'), val=inp.value.trim();
+  if(!val.length){inp.className='';hint.textContent='Required to save to the GOV-MC database.';hint.style.color='#aaa';authUnlocked=false;btn.disabled=true;btn.textContent='🔒 Enter Code to Save';return;}
+  if(val===AUTH_CODE){inp.className='correct';hint.textContent='✓ Authorization granted. You may now save.';hint.style.color='#388e3c';authUnlocked=true;btn.disabled=false;btn.textContent='💾 Save & Generate QR Code';}
+  else if(val.length===AUTH_CODE.length){inp.className='wrong';hint.textContent='✗ Incorrect code. Access denied.';hint.style.color='#c62828';authUnlocked=false;btn.disabled=true;btn.textContent='🔒 Incorrect Code';}
+  else{inp.className='';hint.textContent='Required to save to the GOV-MC database.';hint.style.color='#aaa';authUnlocked=false;btn.disabled=true;btn.textContent='🔒 Enter Code to Save';}
 }
 
 // ── AUTO CERT ID ──────────────────────────────────────────
 async function autoGenCertId() {
-  var btn  = document.getElementById('btn-gen');
-  var hint = document.getElementById('certid-hint');
-  btn.classList.add('spinning'); btn.textContent='…';
-  hint.textContent='Checking existing records…'; hint.style.color='#e65100';
+  var btn=document.getElementById('btn-gen'), hint=document.getElementById('certid-hint');
+  btn.classList.add('spinning');btn.textContent='…';
+  hint.textContent='Checking existing records…';hint.style.color='#e65100';
   try {
-    var snap = await db.ref('certificates').once('value');
-    var existingKeys = snap.exists() ? Object.keys(snap.val()) : [];
-    var usedNumbers = new Set();
-    existingKeys.forEach(function(k){
-      var m=k.match(/^GMC-IPO-(\d+)$/i);
-      if(m) usedNumbers.add(parseInt(m[1],10));
-    });
-    var next=1;
-    while(usedNumbers.has(next)) next++;
+    var snap=await db.ref('certificates').once('value');
+    var keys=snap.exists()?Object.keys(snap.val()):[];
+    var used=new Set();
+    keys.forEach(function(k){var m=k.match(/^GMC-IPO-(\d+)$/i);if(m)used.add(parseInt(m[1],10));});
+    var next=1;while(used.has(next))next++;
     var newId='GMC-IPO-'+String(next).padStart(4,'0');
-    document.getElementById('f-certid').value=newId;
-    updatePreview();
-    hint.textContent='✓ ID generated — not yet in use ('+existingKeys.length+' existing record'+(existingKeys.length===1?'':'s')+')';
-    hint.style.color='#388e3c';
-  } catch(e) {
-    hint.textContent='⚠ Could not reach database: '+e.message;
-    hint.style.color='#c62828';
-  } finally {
-    btn.classList.remove('spinning'); btn.textContent='↻ Auto';
-  }
+    document.getElementById('f-certid').value=newId;updatePreview();
+    hint.textContent='✓ ID generated ('+keys.length+' existing record'+(keys.length===1?'':'s')+')';hint.style.color='#388e3c';
+  } catch(e){hint.textContent='⚠ DB error: '+e.message;hint.style.color='#c62828';}
+  finally{btn.classList.remove('spinning');btn.textContent='↻ Auto';}
 }
 
 // ── DATA ──────────────────────────────────────────────────
 function getData() {
+  var customStamp = document.getElementById('f-stamptext');
+  if (customStamp && customStamp.value.trim()) stampText = customStamp.value.trim().toUpperCase();
   return {
-    corp:        document.getElementById('f-corp').value.trim(),
-    ceo:         document.getElementById('f-ceo').value.trim(),
-    shares:      document.getElementById('f-shares').value.trim(),
-    price:       document.getElementById('f-price').value.trim(),
-    certid:      document.getElementById('f-certid').value.trim(),
-    date:        document.getElementById('f-date').value.trim(),
-    issuedBy:    document.getElementById('f-issuedby').value.trim(),
-    issuerTitle: document.getElementById('f-issuertitle').value.trim(),
+    corp:document.getElementById('f-corp').value.trim(),
+    ceo:document.getElementById('f-ceo').value.trim(),
+    shares:document.getElementById('f-shares').value.trim(),
+    price:document.getElementById('f-price').value.trim(),
+    certid:document.getElementById('f-certid').value.trim(),
+    date:document.getElementById('f-date').value.trim(),
+    issuedBy:document.getElementById('f-issuedby').value.trim(),
+    issuerTitle:document.getElementById('f-issuertitle').value.trim(),
+    theme: currentTheme,
+    stamp: stampEnabled ? stampText : '',
   };
 }
 
-// ── PREVIEW ───────────────────────────────────────────────
-function updatePreview() {
-  document.getElementById('cert-container').innerHTML = certSVG(getData(), qrCache);
-}
+function updatePreview(){document.getElementById('cert-container').innerHTML=certSVG(getData(),qrCache);}
 
-// ── DOWNLOAD SVG ──────────────────────────────────────────
-function downloadSVG() {
-  var d=getData(), svg=certSVG(d,qrCache);
-  var b=new Blob([svg],{type:'image/svg+xml'});
-  var u=URL.createObjectURL(b), a=document.createElement('a');
-  a.href=u; a.download=(d.certid||'certificate')+'.svg'; a.click();
-  URL.revokeObjectURL(u);
-}
-
-// ── DOWNLOAD PNG / JPG ────────────────────────────────────
-function downloadRaster(format) {
-  var d=getData(), svgStr=certSVG(d,qrCache);
-  var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});
-  var url=URL.createObjectURL(blob);
-  var img=new Image();
-  img.onload=function(){
-    var scale=3; // 3× for high-res
-    var canvas=document.createElement('canvas');
-    canvas.width=1400*scale; canvas.height=900*scale;
-    var ctx=canvas.getContext('2d');
-    if(format==='jpg'){ctx.fillStyle='#f8f4e6';ctx.fillRect(0,0,canvas.width,canvas.height);}
-    ctx.scale(scale,scale);
-    ctx.drawImage(img,0,0,1400,900);
-    URL.revokeObjectURL(url);
-    var mime=format==='jpg'?'image/jpeg':'image/png';
-    var quality=format==='jpg'?0.96:undefined;
-    canvas.toBlob(function(b2){
-      var u2=URL.createObjectURL(b2), a=document.createElement('a');
-      a.href=u2; a.download=(d.certid||'certificate')+'.'+format; a.click();
-      URL.revokeObjectURL(u2);
-    }, mime, quality);
-  };
-  img.src=url;
-}
-function downloadPNG(){downloadRaster('png');}
-function downloadJPG(){downloadRaster('jpg');}
+// ── DOWNLOADS ────────────────────────────────────────────
+function downloadSVG(){var d=getData(),svg=certSVG(d,qrCache);var b=new Blob([svg],{type:'image/svg+xml'});var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=(d.certid||'certificate')+'.svg';a.click();URL.revokeObjectURL(u);}
+function downloadRaster(format){var d=getData(),svgStr=certSVG(d,qrCache);var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});var url=URL.createObjectURL(blob);var img=new Image();img.onload=function(){var scale=3;var canvas=document.createElement('canvas');canvas.width=1400*scale;canvas.height=900*scale;var ctx=canvas.getContext('2d');if(format==='jpg'){ctx.fillStyle='#f8f4e6';ctx.fillRect(0,0,canvas.width,canvas.height);}ctx.scale(scale,scale);ctx.drawImage(img,0,0,1400,900);URL.revokeObjectURL(url);var mime=format==='jpg'?'image/jpeg':'image/png';var quality=format==='jpg'?0.96:undefined;canvas.toBlob(function(b2){var u2=URL.createObjectURL(b2),a=document.createElement('a');a.href=u2;a.download=(d.certid||'certificate')+'.'+format;a.click();URL.revokeObjectURL(u2);},mime,quality);};img.src=url;}
+function downloadPNG(){downloadRaster('png');}function downloadJPG(){downloadRaster('jpg');}
 
 // ── QR GEN ────────────────────────────────────────────────
-function genQR(certId) {
-  return new Promise(function(resolve) {
+function genQR(certId){
+  return new Promise(function(resolve){
     var url=buildVerifyURL(certId);
-    var div=document.getElementById('qr-gen');
-    div.innerHTML='';
+    var div=document.getElementById('qr-gen');div.innerHTML='';
     new QRCode(div,{text:url,width:300,height:300,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){
-        var canvas=div.querySelector('canvas');
-        if(canvas) return resolve(canvas.toDataURL('image/png'));
-        var img2=div.querySelector('img');
-        resolve(img2?img2.src:null);
-      });
-    });
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      var canvas=div.querySelector('canvas');
+      if(canvas)return resolve(canvas.toDataURL('image/png'));
+      var img2=div.querySelector('img');resolve(img2?img2.src:null);
+    });});
   });
 }
 
 // ── SAVE ─────────────────────────────────────────────────
-document.getElementById('btn-save').addEventListener('click', async function() {
+document.getElementById('btn-save').addEventListener('click', async function(){
   if(!authUnlocked){setMsg('Authorization code required.','err');return;}
   var d=getData();
   if(!d.certid){setMsg('Please enter a Certificate ID.','err');return;}
@@ -459,37 +472,54 @@ document.getElementById('btn-save').addEventListener('click', async function() {
   setMsg('Saving to GOV-MC records…','load');
   try {
     var existing=await db.ref('certificates/'+d.certid).once('value');
-    if(existing.exists()){
-      setMsg('✗ Certificate ID "'+d.certid+'" already exists. Use ↻ Auto for a new one.','err');
-      return;
-    }
-    var qrUrl=await genQR(d.certid);
-    qrCache=qrUrl;
+    if(existing.exists()){setMsg('✗ Certificate ID "'+d.certid+'" already exists. Use ↻ Auto.','err');return;}
+    var qrUrl=await genQR(d.certid);qrCache=qrUrl;
     await db.ref('certificates/'+d.certid).set({
-      corp:d.corp, ceo:d.ceo, shares:d.shares, price:d.price,
-      certid:d.certid, date:d.date, issuedBy:d.issuedBy,
-      issuerTitle:d.issuerTitle, issuedAt:new Date().toISOString(),
-      status:'ACTIVE', exchange:'GOV-MC Exchange', system:'GOV-MC IPO System v2',
+      corp:d.corp,ceo:d.ceo,shares:d.shares,price:d.price,
+      certid:d.certid,date:d.date,issuedBy:d.issuedBy,
+      issuerTitle:d.issuerTitle,issuedAt:new Date().toISOString(),
+      status:'ACTIVE',exchange:'GOV-MC Exchange',system:'GOV-MC IPO System v2',
+      theme:d.theme,stamp:d.stamp,
     });
     updatePreview();
     setMsg('✓ Saved! Record is live. QR embedded.','ok');
-    document.getElementById('f-authcode').value='';
-    checkAuthCode();
-  } catch(e) {
-    console.error(e); setMsg('Error: '+e.message,'err');
-  }
+    document.getElementById('f-authcode').value='';checkAuthCode();
+  } catch(e){console.error(e);setMsg('Error: '+e.message,'err');}
 });
 
-function setMsg(txt,type){
-  var el=document.getElementById('smsg');
-  el.textContent=txt; el.className='smsg '+type;
-}
+function setMsg(txt,type){var el=document.getElementById('smsg');el.textContent=txt;el.className='smsg '+type;}
 
 // ── XML ESCAPE ────────────────────────────────────────────
 function x(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
+// ── SVG STAMP GENERATOR ───────────────────────────────────
+function makeStamp(accentColor, label) {
+  if (!label) return '';
+  var len = label.length;
+  // Scale font size inversely with length
+  var fs = len <= 4 ? 62 : len <= 6 ? 52 : len <= 8 ? 44 : 36;
+  // Position: lower-left area of main cert body, rotated
+  return '<g transform="translate(340,690) rotate(-28)" opacity="0.88">'+
+    '<circle cx="0" cy="0" r="92" fill="none" stroke="'+accentColor+'" stroke-width="5"/>'+
+    '<circle cx="0" cy="0" r="82" fill="none" stroke="'+accentColor+'" stroke-width="1.5"/>'+
+    '<circle cx="0" cy="0" r="86" fill="'+accentColor+'" fill-opacity="0.06"/>'+
+    '<text x="0" y="8" text-anchor="middle" dominant-baseline="middle" '+
+      'font-size="'+fs+'" font-family="\'DM Sans\',sans-serif" font-weight="900" '+
+      'fill="'+accentColor+'" letter-spacing="4" opacity="0.92">'+x(label)+'</text>'+
+    '<line x1="-70" y1="-22" x2="70" y2="-22" stroke="'+accentColor+'" stroke-width="2" opacity="0.6"/>'+
+    '<line x1="-70" y1="36" x2="70" y2="36" stroke="'+accentColor+'" stroke-width="2" opacity="0.6"/>'+
+    '<text x="0" y="-36" text-anchor="middle" font-size="9" font-family="monospace" '+
+      'fill="'+accentColor+'" letter-spacing="3.5" opacity="0.7">GOV-MC EXCHANGE</text>'+
+    '<text x="0" y="52" text-anchor="middle" font-size="8" font-family="monospace" '+
+      'fill="'+accentColor+'" letter-spacing="2.5" opacity="0.7">OFFICIAL STAMP</text>'+
+  '</g>';
+}
+
 // ── SVG TEMPLATE ─────────────────────────────────────────
 function certSVG(d, qrUrl) {
+  var th = THEMES[d.theme] || THEMES['red'];
+  var ac = th.svgAccent;
+
   var corp        = x(d.corp        || '[CORPORATION NAME]');
   var ceo         = x(d.ceo         || '[CEO NAME]');
   var shares      = x(d.shares      || '[SHARES]');
@@ -503,6 +533,8 @@ function certSVG(d, qrUrl) {
     ? '<image href="'+qrUrl+'" x="997" y="466" width="135" height="135"/>'
     : '<text x="1064" y="524" text-anchor="middle" font-size="9" font-family="monospace" fill="#c0b8a8">QR PENDING</text>'+
       '<text x="1064" y="540" text-anchor="middle" font-size="8" font-family="monospace" fill="#d0c8b8">CLICK SAVE</text>';
+
+  var stampEl = (d.stamp && d.stamp.trim()) ? makeStamp(ac, d.stamp.trim().toUpperCase()) : '';
 
   return '<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">'+
 '<defs>'+
@@ -521,32 +553,32 @@ function certSVG(d, qrUrl) {
 '</defs>'+
 '<rect width="1400" height="900" fill="#f8f4e6"/>'+
 '<rect width="1400" height="900" fill="url(#cg)" opacity="0.13"/>'+
-'<text x="700" y="520" text-anchor="middle" font-size="195" font-family="serif" fill="#7a0000" opacity="0.022" transform="rotate(-11,700,520)">GOV-MC</text>'+
+'<text x="700" y="520" text-anchor="middle" font-size="195" font-family="serif" fill="'+ac+'" opacity="0.022" transform="rotate(-11,700,520)">GOV-MC</text>'+
 '<rect x="13" y="13" width="1374" height="874" fill="none" stroke="#1a1a1a" stroke-width="3.5" rx="2"/>'+
-'<rect x="26" y="26" width="1348" height="848" fill="none" stroke="#7a0000" stroke-width="1.5"/>'+
-'<rect x="31" y="31" width="1338" height="838" fill="none" stroke="#7a0000" stroke-width="0.5"/>'+
-'<text font-size="6.5" fill="#7a0000" letter-spacing="2.8" font-family="monospace" opacity="0.55">'+
+'<rect x="26" y="26" width="1348" height="848" fill="none" stroke="'+ac+'" stroke-width="1.5"/>'+
+'<rect x="31" y="31" width="1338" height="838" fill="none" stroke="'+ac+'" stroke-width="0.5"/>'+
+'<text font-size="6.5" fill="'+ac+'" letter-spacing="2.8" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#tbp">GOV-MC • VERIFIED • DO NOT DUPLICATE • TRACEABLE • AUTHORIZED IPO • GOV-MC • VERIFIED • DO NOT DUPLICATE • TRACEABLE •</textPath>'+
 '</text>'+
-'<text font-size="6.5" fill="#7a0000" letter-spacing="2.8" font-family="monospace" opacity="0.55">'+
+'<text font-size="6.5" fill="'+ac+'" letter-spacing="2.8" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#bbp">AUTHORIZED IPO • GOV-MC EXCHANGE • OFFICIAL RECORD • VERIFIED INSTRUMENT • AUTHORIZED IPO • GOV-MC EXCHANGE •</textPath>'+
 '</text>'+
-'<text font-size="6.5" fill="#7a0000" letter-spacing="2" font-family="monospace" opacity="0.55">'+
+'<text font-size="6.5" fill="'+ac+'" letter-spacing="2" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#lbp">GOV-MC SECURITY • VERIFIED • GOV-MC SECURITY • VERIFIED • GOV-MC SECURITY •</textPath>'+
 '</text>'+
-'<text font-size="6.5" fill="#7a0000" letter-spacing="2" font-family="monospace" opacity="0.55">'+
+'<text font-size="6.5" fill="'+ac+'" letter-spacing="2" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#rbp">AUTHENTIC CERTIFICATE • DO NOT FORGE • AUTHENTIC CERTIFICATE • DO NOT FORGE •</textPath>'+
 '</text>'+
-'<text x="52" y="74" font-size="17" fill="#7a0000" font-family="serif" opacity="0.65">✦</text>'+
-'<text x="1348" y="74" font-size="17" fill="#7a0000" font-family="serif" text-anchor="end" opacity="0.65">✦</text>'+
-'<text x="52" y="855" font-size="17" fill="#7a0000" font-family="serif" opacity="0.65">✦</text>'+
-'<text x="1348" y="855" font-size="17" fill="#7a0000" font-family="serif" text-anchor="end" opacity="0.65">✦</text>'+
+'<text x="52" y="74" font-size="17" fill="'+ac+'" font-family="serif" opacity="0.65">✦</text>'+
+'<text x="1348" y="74" font-size="17" fill="'+ac+'" font-family="serif" text-anchor="end" opacity="0.65">✦</text>'+
+'<text x="52" y="855" font-size="17" fill="'+ac+'" font-family="serif" opacity="0.65">✦</text>'+
+'<text x="1348" y="855" font-size="17" fill="'+ac+'" font-family="serif" text-anchor="end" opacity="0.65">✦</text>'+
 '<text x="700" y="86" text-anchor="middle" font-size="35" font-family="serif" fill="#1a1a1a" letter-spacing="4">OFFICIAL STOCK CERTIFICATE</text>'+
-'<text x="700" y="111" text-anchor="middle" font-size="11.5" font-family="sans-serif" fill="#7a0000" letter-spacing="3.5">GOVERNMENT VERIFIED MARKET INSTRUMENT</text>'+
-'<line x1="80" y1="126" x2="1320" y2="126" stroke="#7a0000" stroke-width="2"/>'+
-'<line x1="80" y1="130" x2="1320" y2="130" stroke="#7a0000" stroke-width="0.5"/>'+
-'<line x1="876" y1="142" x2="876" y2="848" stroke="#7a0000" stroke-width="0.6" stroke-dasharray="5,4" opacity="0.35"/>'+
-'<text x="90" y="161" font-size="9" font-family="sans-serif" fill="#7a0000" letter-spacing="3" font-weight="bold">CORPORATION</text>'+
+'<text x="700" y="111" text-anchor="middle" font-size="11.5" font-family="sans-serif" fill="'+ac+'" letter-spacing="3.5">GOVERNMENT VERIFIED MARKET INSTRUMENT</text>'+
+'<line x1="80" y1="126" x2="1320" y2="126" stroke="'+ac+'" stroke-width="2"/>'+
+'<line x1="80" y1="130" x2="1320" y2="130" stroke="'+ac+'" stroke-width="0.5"/>'+
+'<line x1="876" y1="142" x2="876" y2="848" stroke="'+ac+'" stroke-width="0.6" stroke-dasharray="5,4" opacity="0.35"/>'+
+'<text x="90" y="161" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">CORPORATION</text>'+
 '<text x="90" y="197" font-size="27" font-family="serif" fill="#1a1a1a">'+corp+'</text>'+
 '<line x1="90" y1="212" x2="838" y2="212" stroke="#c9b8a8" stroke-width="0.7"/>'+
 '<text x="90" y="244" font-size="13.5" font-family="serif" fill="#3a3a3a">This certifies that the corporation listed above, under the leadership of</text>'+
@@ -555,13 +587,13 @@ function certSVG(d, qrUrl) {
 '<text x="90" y="322" font-size="13.5" font-family="serif" fill="#3a3a3a">authorized to operate as a publicly listed company on the GOV-MC Exchange.</text>'+
 '<text x="90" y="349" font-size="12.5" font-family="serif" fill="#777" font-style="italic">All corporate activities are subject to oversight by the WGA, WEG, WBB, and WLA.</text>'+
 '<line x1="90" y1="366" x2="838" y2="366" stroke="#c9b8a8" stroke-width="0.7"/>'+
-'<text x="90" y="390" font-size="9" font-family="sans-serif" fill="#7a0000" letter-spacing="3" font-weight="bold">SHARE INFORMATION</text>'+
+'<text x="90" y="390" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">SHARE INFORMATION</text>'+
 '<text x="90" y="418" font-size="13.5" font-family="serif" fill="#666">Authorized Shares</text>'+
 '<text x="320" y="418" font-size="14.5" font-family="serif" fill="#1a1a1a" font-weight="bold">'+shares+'</text>'+
 '<text x="90" y="445" font-size="13.5" font-family="serif" fill="#666">Initial Share Price</text>'+
 '<text x="320" y="445" font-size="14.5" font-family="serif" fill="#1a1a1a" font-weight="bold">'+price+'</text>'+
 '<line x1="90" y1="462" x2="838" y2="462" stroke="#c9b8a8" stroke-width="0.7"/>'+
-'<text x="90" y="485" font-size="9" font-family="sans-serif" fill="#7a0000" letter-spacing="3" font-weight="bold">CERTIFICATE INFORMATION</text>'+
+'<text x="90" y="485" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">CERTIFICATE INFORMATION</text>'+
 '<text x="90" y="512" font-size="13.5" font-family="serif" fill="#666">Certificate ID</text>'+
 '<text x="270" y="512" font-size="13.5" font-family="serif" fill="#1a1a1a" font-weight="bold">'+certid+'</text>'+
 '<text x="90" y="537" font-size="13.5" font-family="serif" fill="#666">Date Issued</text>'+
@@ -569,53 +601,54 @@ function certSVG(d, qrUrl) {
 '<text x="90" y="562" font-size="13.5" font-family="serif" fill="#666">Exchange</text>'+
 '<text x="270" y="562" font-size="13.5" font-family="serif" fill="#1a1a1a">GOV-MC Exchange</text>'+
 '<line x1="90" y1="578" x2="838" y2="578" stroke="#c9b8a8" stroke-width="0.7"/>'+
-'<text x="90" y="600" font-size="9" font-family="sans-serif" fill="#7a0000" letter-spacing="3" font-weight="bold">ISSUED BY</text>'+
+'<text x="90" y="600" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">ISSUED BY</text>'+
 '<text x="90" y="626" font-size="14.5" font-family="serif" fill="#1a1a1a" font-weight="bold">'+issuedBy+'</text>'+
 '<text x="90" y="647" font-size="12" font-family="sans-serif" fill="#777">'+issuerTitle+'</text>'+
 '<line x1="90" y1="670" x2="430" y2="670" stroke="#1a1a1a" stroke-width="0.9"/>'+
 '<text x="90" y="687" font-size="10.5" font-family="sans-serif" fill="#888">Authorized Signatory — GOV-MC Exchange Authority</text>'+
 '<line x1="90" y1="730" x2="430" y2="730" stroke="#1a1a1a" stroke-width="0.9"/>'+
 '<text x="90" y="747" font-size="10.5" font-family="sans-serif" fill="#888">Corporate Registrar</text>'+
-'<text x="1130" y="162" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#7a0000" letter-spacing="3" font-weight="bold">OFFICIAL SEAL</text>'+
-'<circle cx="1130" cy="308" r="100" fill="none" stroke="#7a0000" stroke-width="2"/>'+
-'<circle cx="1130" cy="308" r="88"  fill="none" stroke="#7a0000" stroke-width="1"/>'+
-'<circle cx="1130" cy="308" r="85"  fill="#f8f4e6"/>'+
+stampEl+
+'<text x="1130" y="162" text-anchor="middle" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">OFFICIAL SEAL</text>'+
+'<circle cx="1130" cy="308" r="100" fill="none" stroke="'+ac+'" stroke-width="2"/>'+
+'<circle cx="1130" cy="308" r="88" fill="none" stroke="'+ac+'" stroke-width="1"/>'+
+'<circle cx="1130" cy="308" r="85" fill="#f8f4e6"/>'+
 '<rect x="1046" y="224" width="168" height="168" fill="url(#cg)" opacity="0.38" clip-path="url(#csc)"/>'+
-'<circle cx="1130" cy="308" r="38" fill="none" stroke="#7a0000" stroke-width="0.9"/>'+
-'<circle cx="1130" cy="308" r="33" fill="#7a0000" opacity="0.07"/>'+
-'<text x="1130" y="303" text-anchor="middle" font-size="11" font-family="\'Courier New\',monospace" fill="#7a0000" font-weight="bold" letter-spacing="1.5">GOV</text>'+
-'<text x="1130" y="319" text-anchor="middle" font-size="11" font-family="\'Courier New\',monospace" fill="#7a0000" font-weight="bold" letter-spacing="1.5">MC</text>'+
-'<text font-size="6.5" fill="#7a0000" letter-spacing="1.8" font-family="monospace">'+
+'<circle cx="1130" cy="308" r="38" fill="none" stroke="'+ac+'" stroke-width="0.9"/>'+
+'<circle cx="1130" cy="308" r="33" fill="'+ac+'" opacity="0.07"/>'+
+'<text x="1130" y="303" text-anchor="middle" font-size="11" font-family="\'Courier New\',monospace" fill="'+ac+'" font-weight="bold" letter-spacing="1.5">GOV</text>'+
+'<text x="1130" y="319" text-anchor="middle" font-size="11" font-family="\'Courier New\',monospace" fill="'+ac+'" font-weight="bold" letter-spacing="1.5">MC</text>'+
+'<text font-size="6.5" fill="'+ac+'" letter-spacing="1.8" font-family="monospace">'+
 '  <textPath href="#srp">GOV-MC • VERIFIED • AUTHORIZED • SECURE • TRACEABLE • GOV-MC •</textPath>'+
 '</text>'+
-'<text font-size="9.5" fill="#7a0000" font-family="serif" font-weight="bold">'+
+'<text font-size="9.5" fill="'+ac+'" font-family="serif" font-weight="bold">'+
 '  <textPath href="#stp" startOffset="50%" text-anchor="middle">GOVERNMENT-MC</textPath>'+
 '</text>'+
-'<text font-size="9.5" fill="#7a0000" font-family="serif">'+
+'<text font-size="9.5" fill="'+ac+'" font-family="serif">'+
 '  <textPath href="#sbp" startOffset="50%" text-anchor="middle">VERIFIED SEAL</textPath>'+
 '</text>'+
-'<line x1="1130" y1="206" x2="1130" y2="215" stroke="#7a0000" stroke-width="1.5"/>'+
-'<line x1="1130" y1="401" x2="1130" y2="410" stroke="#7a0000" stroke-width="1.5"/>'+
-'<line x1="1028" y1="308" x2="1037" y2="308" stroke="#7a0000" stroke-width="1.5"/>'+
-'<line x1="1223" y1="308" x2="1232" y2="308" stroke="#7a0000" stroke-width="1.5"/>'+
+'<line x1="1130" y1="206" x2="1130" y2="215" stroke="'+ac+'" stroke-width="1.5"/>'+
+'<line x1="1130" y1="401" x2="1130" y2="410" stroke="'+ac+'" stroke-width="1.5"/>'+
+'<line x1="1028" y1="308" x2="1037" y2="308" stroke="'+ac+'" stroke-width="1.5"/>'+
+'<line x1="1223" y1="308" x2="1232" y2="308" stroke="'+ac+'" stroke-width="1.5"/>'+
 '<line x1="898" y1="424" x2="1352" y2="424" stroke="#c9b8a8" stroke-width="0.7"/>'+
-'<text x="1130" y="448" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#7a0000" letter-spacing="3" font-weight="bold">VERIFICATION CODE</text>'+
+'<text x="1130" y="448" text-anchor="middle" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">VERIFICATION CODE</text>'+
 '<rect x="993" y="462" width="275" height="152" fill="#fff" stroke="#1a1a1a" stroke-width="1.2" rx="2"/>'+
 '<rect x="997" y="466" width="135" height="144" fill="none"/>'+
 qrEl+
 '<text x="1148" y="484" font-size="8.5" font-family="sans-serif" fill="#888">Scan with your</text>'+
 '<text x="1148" y="497" font-size="8.5" font-family="sans-serif" fill="#888">phone camera to</text>'+
 '<text x="1148" y="510" font-size="8.5" font-family="sans-serif" fill="#888">verify this cert</text>'+
-'<text x="1148" y="530" font-size="8" font-family="monospace" fill="#7a0000">GOV-MC</text>'+
-'<text x="1148" y="543" font-size="8" font-family="monospace" fill="#7a0000">VERIFY SYS</text>'+
+'<text x="1148" y="530" font-size="8" font-family="monospace" fill="'+ac+'">GOV-MC</text>'+
+'<text x="1148" y="543" font-size="8" font-family="monospace" fill="'+ac+'">VERIFY SYS</text>'+
 '<line x1="1143" y1="555" x2="1258" y2="555" stroke="#c9b8a8" stroke-width="0.5"/>'+
 '<text x="1148" y="568" font-size="7.5" font-family="sans-serif" fill="#aaa">RTDB Verified</text>'+
 '<text x="1148" y="580" font-size="7.5" font-family="sans-serif" fill="#aaa">Tamper-Evident</text>'+
 '<text x="1148" y="592" font-size="7.5" font-family="sans-serif" fill="#aaa">Live Record</text>'+
 '<text x="1064" y="630" text-anchor="middle" font-size="10" font-family="sans-serif" fill="#666">Scan to Verify</text>'+
-'<text x="1064" y="644" text-anchor="middle" font-size="8.5" font-family="monospace" fill="#7a0000" letter-spacing="1.5">GOV-MC SYSTEM</text>'+
-'<rect x="80" y="798" width="1240" height="36" fill="#7a0000" opacity="0.055" rx="2"/>'+
-'<text x="700" y="821" text-anchor="middle" font-size="9.5" font-family="monospace" fill="#7a0000" letter-spacing="1.3">THIS CERTIFICATE IS ISSUED UNDER THE AUTHORITY OF THE GOV-MC EXCHANGE SYSTEM • UNAUTHORIZED REPRODUCTION IS PROHIBITED</text>'+
+'<text x="1064" y="644" text-anchor="middle" font-size="8.5" font-family="monospace" fill="'+ac+'" letter-spacing="1.5">GOV-MC SYSTEM</text>'+
+'<rect x="80" y="798" width="1240" height="36" fill="'+ac+'" opacity="0.055" rx="2"/>'+
+'<text x="700" y="821" text-anchor="middle" font-size="9.5" font-family="monospace" fill="'+ac+'" letter-spacing="1.3">THIS CERTIFICATE IS ISSUED UNDER THE AUTHORITY OF THE GOV-MC EXCHANGE SYSTEM • UNAUTHORIZED REPRODUCTION IS PROHIBITED</text>'+
 '</svg>';
 }
 
