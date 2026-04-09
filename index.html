@@ -195,8 +195,76 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .prev-topbar{display:flex;align-items:center;gap:12px;width:100%;max-width:1000px}
 .prev-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;font-weight:700}
 .prev-badge{font-size:9px;background:rgba(122,0,0,.1);color:var(--accent);padding:3px 11px;border-radius:12px;letter-spacing:1.5px;font-weight:700;}
-.cert-wrap{background:#fff;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.06);width:100%;max-width:1000px;overflow:hidden;}
+.cert-wrap{background:#fff;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.06);width:100%;max-width:1000px;overflow:hidden;position:relative;}
 .cert-wrap svg,.cert-wrap > div > svg{width:100%;height:auto;display:block}
+
+/* ─── SIG & STAMP OVERLAY ─── */
+#sig-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
+.sig-item{
+  position:absolute;pointer-events:all;cursor:grab;
+  user-select:none;-webkit-user-select:none;
+  transform-origin:top left;
+}
+.sig-item:active{cursor:grabbing;}
+.sig-item img{display:block;max-width:100%;height:auto;pointer-events:none;}
+.sig-item .sig-toolbar{
+  position:absolute;top:-22px;left:0;
+  display:flex;gap:3px;opacity:0;transition:opacity .15s;
+  pointer-events:all;
+}
+.sig-item:hover .sig-toolbar{opacity:1;}
+.sig-tbtn{
+  background:rgba(30,30,30,.82);color:#fff;border:none;
+  font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;
+  font-family:'DM Sans',sans-serif;white-space:nowrap;
+}
+.sig-tbtn:hover{background:#000;}
+.sig-resize{
+  position:absolute;bottom:-6px;right:-6px;
+  width:14px;height:14px;background:var(--accent);border-radius:50%;
+  cursor:se-resize;pointer-events:all;
+}
+/* Stamp overlay */
+#stamp-overlay-el{
+  position:absolute;pointer-events:all;
+  user-select:none;-webkit-user-select:none;
+  transform-origin:center center;
+  cursor:grab;
+}
+#stamp-overlay-el:active{cursor:grabbing;}
+.stamp-rot-handle{
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  width:18px;height:18px;border-radius:50%;cursor:crosshair;
+  border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);
+  pointer-events:all;
+}
+.stamp-ot{
+  position:absolute;top:-28px;left:50%;transform:translateX(-50%);
+  display:flex;gap:3px;opacity:0;transition:opacity .15s;
+  pointer-events:all;white-space:nowrap;
+}
+#stamp-overlay-el:hover .stamp-ot{opacity:1;}
+.rot-label{
+  position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);
+  font-size:9px;font-family:'DM Mono',monospace;
+  background:rgba(0,0,0,.65);color:#fff;padding:2px 7px;
+  border-radius:10px;opacity:0;transition:opacity .15s;white-space:nowrap;
+  pointer-events:none;
+}
+#stamp-overlay-el:hover .rot-label{opacity:1;}
+
+/* Upload sig buttons */
+.sig-upload-row{display:flex;gap:8px;margin-bottom:12px;}
+.sig-upload-btn{
+  flex:1;padding:9px 8px;border:1.5px dashed var(--border);
+  border-radius:8px;background:var(--card);cursor:pointer;
+  font-size:10.5px;font-weight:600;color:var(--muted);
+  text-align:center;transition:all .15s;font-family:'DM Sans',sans-serif;
+}
+.sig-upload-btn:hover{border-color:var(--accent);color:var(--accent);background:#fff0f0;}
+.sig-upload-btn.has-sig{border-color:var(--accent);background:#fff0f0;color:var(--accent);}
+.sig-upload-btn.uploading{border-color:#e65100;background:#fff8e1;color:#e65100;cursor:wait;}
+.sig-hint{font-size:10px;color:#bbb;letter-spacing:.3px;line-height:1.5;margin-bottom:4px;}
 .prev-hint{font-size:11px;color:#bbb;letter-spacing:.5px;margin-top:2px}
 #qr-gen{position:fixed;left:-9999px;top:-9999px;width:300px;height:300px}
 </style>
@@ -242,8 +310,25 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
         </div>
         <div class="field stamp-text-field" style="margin-top:8px">
           <label>Custom Stamp Text</label>
-          <input type="text" id="f-stamptext" value="ACTIVE" maxlength="12" oninput="updatePreview()" placeholder="e.g. APPROVED">
+          <input type="text" id="f-stamptext" value="ACTIVE" maxlength="12" oninput="onStampTextInput()" placeholder="e.g. APPROVED">
         </div>
+        <div class="sig-hint" style="margin-top:4px">🖱 <strong>Drag</strong> the stamp anywhere · Grab the <strong>top dot</strong> to rotate</div>
+      </div>
+
+      <div class="slabel"><span class="slabel-icon">✍️</span> E-Signatures</div>
+      <div class="sig-hint">Upload signature images — saved to Cloudinary. Drag to reposition, resize from corner dot.</div>
+      <div class="sig-upload-row">
+        <label class="sig-upload-btn" id="sig1-btn" title="Upload Authorized Signatory signature">
+          ✍ Sig 1<br><span style="font-size:9px;font-weight:400">Authorized</span>
+          <input type="file" accept="image/*" style="display:none" onchange="handleSigUpload('sig1',this)">
+        </label>
+        <label class="sig-upload-btn" id="sig2-btn" title="Upload Corporate Registrar signature">
+          ✍ Sig 2<br><span style="font-size:9px;font-weight:400">Registrar</span>
+          <input type="file" accept="image/*" style="display:none" onchange="handleSigUpload('sig2',this)">
+        </label>
+      </div>
+      <div id="sig-clear-row" style="display:none;margin-bottom:12px;">
+        <button class="btn-gen" style="width:100%;font-size:10px;" onclick="clearAllSigs()">🗑 Clear All Signatures</button>
       </div>
 
       <div class="slabel"><span class="slabel-icon">🏢</span> Corporation</div>
@@ -317,7 +402,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <span class="prev-title">📋 Live Preview</span>
       <span class="prev-badge" id="prev-badge">REAL-TIME</span>
     </div>
-    <div class="cert-wrap"><div id="cert-container"></div></div>
+    <div class="cert-wrap"><div id="cert-container"></div><div id="sig-overlay"></div></div>
     <div class="prev-hint">Fill in the form to update the certificate in real time</div>
   </div>
 </div>
@@ -442,11 +527,286 @@ function getData() {
   };
 }
 
-function updatePreview(){document.getElementById('cert-container').innerHTML=certSVG(getData(),qrCache);}
+// ── CLOUDINARY ────────────────────────────────────────────
+var CLOUDINARY_CLOUD  = 'damr6r9op';
+var CLOUDINARY_PRESET = 'org-resources';
+
+async function uploadToCloudinary(file) {
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  var res = await fetch('https://api.cloudinary.com/v1_1/' + CLOUDINARY_CLOUD + '/image/upload', { method:'POST', body:fd });
+  var data = await res.json();
+  if (data.error) throw new Error(data.error.message);
+  return data.secure_url;
+}
+
+// ── E-SIGNATURE STATE ─────────────────────────────────────
+var sigImages = { sig1: null, sig2: null }; // { url, svgX, svgY, svgW, svgH }
+var _dragState   = null;
+var _resizeState = null;
+var _rotState    = null;
+
+var SIG_DEFAULTS = {
+  sig1: { svgX: 90, svgY: 610, svgW: 260, svgH: 80 },
+  sig2: { svgX: 90, svgY: 668, svgW: 260, svgH: 80 },
+};
+
+// ── STAMP OVERLAY STATE ───────────────────────────────────
+var stampOverlay = { svgCX: 645, svgCY: 715, svgSize: 210, rotation: -20 };
+
+async function handleSigUpload(key, input) {
+  var file = input.files[0]; if (!file) return;
+  var btn = document.getElementById(key+'-btn');
+  btn.classList.add('uploading');
+  btn.querySelector('span').textContent = '⏳ Uploading…';
+  try {
+    var url = await uploadToCloudinary(file);
+    var d = SIG_DEFAULTS[key];
+    sigImages[key] = { url: url, svgX: d.svgX, svgY: d.svgY, svgW: d.svgW, svgH: d.svgH };
+    btn.classList.remove('uploading');
+    btn.classList.add('has-sig');
+    btn.querySelector('span').textContent = '✓ Saved';
+    document.getElementById('sig-clear-row').style.display = 'block';
+    renderSigOverlays();
+  } catch(e) {
+    btn.classList.remove('uploading');
+    btn.querySelector('span').textContent = '✗ Failed';
+    alert('Upload failed: ' + e.message);
+  }
+  input.value = '';
+}
+
+function clearAllSigs() {
+  sigImages.sig1 = null; sigImages.sig2 = null;
+  ['sig1','sig2'].forEach(function(k) {
+    var btn = document.getElementById(k+'-btn');
+    btn.classList.remove('has-sig');
+    btn.querySelector('span').textContent = k === 'sig1' ? 'Authorized' : 'Registrar';
+  });
+  document.getElementById('sig-clear-row').style.display = 'none';
+  renderSigOverlays();
+}
+
+function svgToPercent(svgX, svgY) {
+  return { left: (svgX / 1400 * 100)+'%', top: (svgY / 900 * 100)+'%' };
+}
+function svgWHtoPercent(svgW, svgH) {
+  return { width: (svgW / 1400 * 100)+'%', height: (svgH / 900 * 100)+'%' };
+}
+function screenToSVGCoords(screenX, screenY) {
+  var svgEl = document.querySelector('#cert-container svg');
+  if (!svgEl) return { x:0, y:0 };
+  var rect = svgEl.getBoundingClientRect();
+  return { x:(screenX-rect.left)/rect.width*1400, y:(screenY-rect.top)/rect.height*900 };
+}
+
+// ── RENDER ALL OVERLAYS ───────────────────────────────────
+function renderSigOverlays() {
+  var overlay = document.getElementById('sig-overlay');
+  // Keep stamp el if it exists
+  var stampEl = document.getElementById('stamp-overlay-el');
+  overlay.innerHTML = '';
+  if (stampEl) overlay.appendChild(stampEl);
+
+  ['sig1','sig2'].forEach(function(key) {
+    var sig = sigImages[key]; if (!sig) return;
+    var pos = svgToPercent(sig.svgX, sig.svgY);
+    var sz  = svgWHtoPercent(sig.svgW, sig.svgH);
+    var el  = document.createElement('div');
+    el.className = 'sig-item'; el.dataset.key = key;
+    el.style.left = pos.left; el.style.top = pos.top;
+    el.style.width = sz.width; el.style.height = sz.height;
+    el.innerHTML =
+      '<div class="sig-toolbar">'+
+        '<button class="sig-tbtn" onclick="removeSig(\''+key+'\')">✕ Remove</button>'+
+        '<button class="sig-tbtn" onclick="resetSigPos(\''+key+'\')">⟲ Reset</button>'+
+      '</div>'+
+      '<img src="'+sig.url+'" draggable="false" style="width:100%;height:100%;object-fit:contain;"/>'+
+      '<div class="sig-resize" data-key="'+key+'"></div>';
+    el.addEventListener('mousedown', function(e) {
+      if (e.target.classList.contains('sig-resize') || e.target.classList.contains('sig-tbtn')) return;
+      e.preventDefault();
+      var sc = screenToSVGCoords(e.clientX, e.clientY);
+      _dragState = { key:key, startX:sc.x, startY:sc.y, origX:sig.svgX, origY:sig.svgY };
+    });
+    el.querySelector('.sig-resize').addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      var sc = screenToSVGCoords(e.clientX, e.clientY);
+      _resizeState = { key:key, startX:sc.x, startY:sc.y, origW:sig.svgW, origH:sig.svgH };
+    });
+    overlay.appendChild(el);
+  });
+
+  renderStampOverlay();
+}
+
+// ── STAMP OVERLAY RENDER ──────────────────────────────────
+function renderStampOverlay() {
+  var existing = document.getElementById('stamp-overlay-el');
+  if (existing) existing.remove();
+  if (!stampEnabled) return;
+
+  var overlay = document.getElementById('sig-overlay');
+  var s  = stampOverlay;
+  var ac = THEMES[currentTheme].svgAccent;
+  var label = stampText;
+  var len = label.length;
+  var fs  = len <= 4 ? 34 : len <= 6 ? 27 : len <= 8 ? 22 : 17;
+
+  var leftPct  = (s.svgCX - s.svgSize/2) / 1400 * 100;
+  var topPct   = (s.svgCY - s.svgSize/2) / 900  * 100;
+  var sizePctW = s.svgSize / 1400 * 100;
+  var sizePctH = s.svgSize / 900  * 100;
+
+  var el = document.createElement('div');
+  el.id = 'stamp-overlay-el';
+  el.style.left   = leftPct  + '%';
+  el.style.top    = topPct   + '%';
+  el.style.width  = sizePctW + '%';
+  el.style.height = sizePctH + '%';
+  el.style.transform = 'rotate('+s.rotation+'deg)';
+
+  el.innerHTML =
+    '<svg viewBox="-100 -100 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="display:block;pointer-events:none;">'+
+      '<circle cx="0" cy="0" r="92" fill="none" stroke="'+ac+'" stroke-width="5" opacity="0.88"/>'+
+      '<circle cx="0" cy="0" r="82" fill="none" stroke="'+ac+'" stroke-width="1.5" opacity="0.88"/>'+
+      '<circle cx="0" cy="0" r="86" fill="'+ac+'" fill-opacity="0.06"/>'+
+      '<text x="0" y="8" text-anchor="middle" dominant-baseline="middle" font-size="'+fs+'" font-family="DM Sans,sans-serif" font-weight="900" fill="'+ac+'" letter-spacing="4" opacity="0.92">'+label+'</text>'+
+      '<line x1="-70" y1="-22" x2="70" y2="-22" stroke="'+ac+'" stroke-width="2" opacity="0.6"/>'+
+      '<line x1="-70" y1="36" x2="70" y2="36" stroke="'+ac+'" stroke-width="2" opacity="0.6"/>'+
+      '<text x="0" y="-36" text-anchor="middle" font-size="9" font-family="monospace" fill="'+ac+'" letter-spacing="3.5" opacity="0.7">GOV-MC EXCHANGE</text>'+
+      '<text x="0" y="52" text-anchor="middle" font-size="8" font-family="monospace" fill="'+ac+'" letter-spacing="2.5" opacity="0.7">OFFICIAL STAMP</text>'+
+    '</svg>'+
+    '<div class="stamp-rot-handle" id="stamp-rot-handle" style="background:'+ac+';"></div>'+
+    '<div class="stamp-ot">'+
+      '<button class="sig-tbtn" onclick="toggleStamp()">✕ Remove</button>'+
+    '</div>'+
+    '<div class="rot-label" id="stamp-rot-label">'+s.rotation+'°</div>';
+
+  // Drag stamp body
+  el.addEventListener('mousedown', function(e) {
+    if (e.target.id === 'stamp-rot-handle' || e.target.classList.contains('sig-tbtn')) return;
+    e.preventDefault();
+    var sc = screenToSVGCoords(e.clientX, e.clientY);
+    _dragState = { key:'stamp', startX:sc.x, startY:sc.y, origCX:s.svgCX, origCY:s.svgCY };
+  });
+
+  // Rotate handle
+  el.querySelector('#stamp-rot-handle').addEventListener('mousedown', function(e) {
+    e.preventDefault(); e.stopPropagation();
+    _rotState = { startRot: s.rotation };
+  });
+
+  overlay.appendChild(el);
+}
+
+// ── MOUSE EVENTS ──────────────────────────────────────────
+document.addEventListener('mousemove', function(e) {
+  // Sig drag
+  if (_dragState && _dragState.key !== 'stamp') {
+    var cur = screenToSVGCoords(e.clientX, e.clientY);
+    var key = _dragState.key, sig = sigImages[key]; if (!sig) return;
+    sig.svgX = _dragState.origX + (cur.x - _dragState.startX);
+    sig.svgY = _dragState.origY + (cur.y - _dragState.startY);
+    var el = document.querySelector('.sig-item[data-key="'+key+'"]');
+    if (el) { var p = svgToPercent(sig.svgX, sig.svgY); el.style.left=p.left; el.style.top=p.top; }
+  }
+  // Stamp drag
+  if (_dragState && _dragState.key === 'stamp') {
+    var cur2 = screenToSVGCoords(e.clientX, e.clientY);
+    var s = stampOverlay;
+    s.svgCX = _dragState.origCX + (cur2.x - _dragState.startX);
+    s.svgCY = _dragState.origCY + (cur2.y - _dragState.startY);
+    var sel = document.getElementById('stamp-overlay-el');
+    if (sel) {
+      sel.style.left = (s.svgCX - s.svgSize/2)/1400*100+'%';
+      sel.style.top  = (s.svgCY - s.svgSize/2)/900 *100+'%';
+    }
+  }
+  // Sig resize
+  if (_resizeState) {
+    var cur3 = screenToSVGCoords(e.clientX, e.clientY);
+    var key3 = _resizeState.key, sig3 = sigImages[key3]; if (!sig3) return;
+    sig3.svgW = Math.max(40, _resizeState.origW + (cur3.x - _resizeState.startX));
+    sig3.svgH = Math.max(20, _resizeState.origH + (cur3.y - _resizeState.startY));
+    var el3 = document.querySelector('.sig-item[data-key="'+key3+'"]');
+    if (el3) { var s3=svgWHtoPercent(sig3.svgW,sig3.svgH); el3.style.width=s3.width; el3.style.height=s3.height; }
+  }
+  // Stamp rotate
+  if (_rotState) {
+    var svgEl = document.querySelector('#cert-container svg');
+    if (!svgEl) return;
+    var rect = svgEl.getBoundingClientRect();
+    var s4 = stampOverlay;
+    var cx = rect.left + (s4.svgCX / 1400) * rect.width;
+    var cy = rect.top  + (s4.svgCY / 900)  * rect.height;
+    var angle = Math.round(Math.atan2(e.clientX - cx, -(e.clientY - cy)) * 180 / Math.PI);
+    s4.rotation = angle;
+    var rEl = document.getElementById('stamp-overlay-el');
+    if (rEl) {
+      rEl.style.transform = 'rotate('+angle+'deg)';
+      var lbl = document.getElementById('stamp-rot-label');
+      if (lbl) lbl.textContent = angle+'°';
+    }
+  }
+});
+document.addEventListener('mouseup', function() { _dragState=null; _resizeState=null; _rotState=null; });
+
+function removeSig(key) {
+  sigImages[key] = null;
+  var btn = document.getElementById(key+'-btn');
+  btn.classList.remove('has-sig');
+  btn.querySelector('span').textContent = key === 'sig1' ? 'Authorized' : 'Registrar';
+  if (!sigImages.sig1 && !sigImages.sig2) document.getElementById('sig-clear-row').style.display = 'none';
+  renderSigOverlays();
+}
+function resetSigPos(key) {
+  var d = SIG_DEFAULTS[key];
+  if (sigImages[key]) Object.assign(sigImages[key], d);
+  renderSigOverlays();
+}
+
+// ── INJECT ALL OVERLAYS INTO SVG FOR DOWNLOAD ─────────────
+function injectSigsIntoSVG(svgStr) {
+  var inject = '';
+  // Signatures
+  ['sig1','sig2'].forEach(function(key) {
+    var sig = sigImages[key]; if (!sig) return;
+    inject += '<image href="'+sig.url+'" x="'+Math.round(sig.svgX)+'" y="'+Math.round(sig.svgY)+'" width="'+Math.round(sig.svgW)+'" height="'+Math.round(sig.svgH)+'" preserveAspectRatio="xMidYMid meet"/>';
+  });
+  // Stamp
+  if (stampEnabled && stampText) {
+    var s  = stampOverlay;
+    var ac = THEMES[currentTheme].svgAccent;
+    var lbl = stampText; var len = lbl.length;
+    var fs = len<=4?34:len<=6?27:len<=8?22:17;
+    inject +=
+      '<g transform="translate('+s.svgCX+','+s.svgCY+') rotate('+s.rotation+')" opacity="0.88">'+
+        '<circle cx="0" cy="0" r="92" fill="none" stroke="'+ac+'" stroke-width="5"/>'+
+        '<circle cx="0" cy="0" r="82" fill="none" stroke="'+ac+'" stroke-width="1.5"/>'+
+        '<circle cx="0" cy="0" r="86" fill="'+ac+'" fill-opacity="0.06"/>'+
+        '<text x="0" y="8" text-anchor="middle" dominant-baseline="middle" font-size="'+fs+'" font-family="DM Sans,sans-serif" font-weight="900" fill="'+ac+'" letter-spacing="4" opacity="0.92">'+lbl+'</text>'+
+        '<line x1="-70" y1="-22" x2="70" y2="-22" stroke="'+ac+'" stroke-width="2" opacity="0.6"/>'+
+        '<line x1="-70" y1="36" x2="70" y2="36" stroke="'+ac+'" stroke-width="2" opacity="0.6"/>'+
+        '<text x="0" y="-36" text-anchor="middle" font-size="9" font-family="monospace" fill="'+ac+'" letter-spacing="3.5" opacity="0.7">GOV-MC EXCHANGE</text>'+
+        '<text x="0" y="52" text-anchor="middle" font-size="8" font-family="monospace" fill="'+ac+'" letter-spacing="2.5" opacity="0.7">OFFICIAL STAMP</text>'+
+      '</g>';
+  }
+  return inject ? svgStr.replace('</svg>', inject+'</svg>') : svgStr;
+}
+
+function onStampTextInput() {
+  var v = document.getElementById('f-stamptext').value.trim();
+  if (v) stampText = v.toUpperCase();
+  renderStampOverlay();
+}
+
+function updatePreview(){document.getElementById('cert-container').innerHTML=certSVG(getData(),qrCache);renderSigOverlays();}
 
 // ── DOWNLOADS ────────────────────────────────────────────
-function downloadSVG(){var d=getData(),svg=certSVG(d,qrCache);var b=new Blob([svg],{type:'image/svg+xml'});var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=(d.certid||'certificate')+'.svg';a.click();URL.revokeObjectURL(u);}
-function downloadRaster(format){var d=getData(),svgStr=certSVG(d,qrCache);var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});var url=URL.createObjectURL(blob);var img=new Image();img.onload=function(){var scale=3;var canvas=document.createElement('canvas');canvas.width=1400*scale;canvas.height=900*scale;var ctx=canvas.getContext('2d');if(format==='jpg'){ctx.fillStyle='#f8f4e6';ctx.fillRect(0,0,canvas.width,canvas.height);}ctx.scale(scale,scale);ctx.drawImage(img,0,0,1400,900);URL.revokeObjectURL(url);var mime=format==='jpg'?'image/jpeg':'image/png';var quality=format==='jpg'?0.96:undefined;canvas.toBlob(function(b2){var u2=URL.createObjectURL(b2),a=document.createElement('a');a.href=u2;a.download=(d.certid||'certificate')+'.'+format;a.click();URL.revokeObjectURL(u2);},mime,quality);};img.src=url;}
+function downloadSVG(){var d=getData(),svg=injectSigsIntoSVG(certSVG(d,qrCache));var b=new Blob([svg],{type:'image/svg+xml'});var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=(d.certid||'certificate')+'.svg';a.click();URL.revokeObjectURL(u);}
+function downloadRaster(format){var d=getData(),svgStr=injectSigsIntoSVG(certSVG(d,qrCache));var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'});var url=URL.createObjectURL(blob);var img=new Image();img.onload=function(){var scale=3;var canvas=document.createElement('canvas');canvas.width=1400*scale;canvas.height=900*scale;var ctx=canvas.getContext('2d');if(format==='jpg'){ctx.fillStyle='#f8f4e6';ctx.fillRect(0,0,canvas.width,canvas.height);}ctx.scale(scale,scale);ctx.drawImage(img,0,0,1400,900);URL.revokeObjectURL(url);var mime=format==='jpg'?'image/jpeg':'image/png';var quality=format==='jpg'?0.96:undefined;canvas.toBlob(function(b2){var u2=URL.createObjectURL(b2),a=document.createElement('a');a.href=u2;a.download=(d.certid||'certificate')+'.'+format;a.click();URL.revokeObjectURL(u2);},mime,quality);};img.src=url;}
 function downloadPNG(){downloadRaster('png');}function downloadJPG(){downloadRaster('jpg');}
 
 // ── QR GEN ────────────────────────────────────────────────
@@ -497,9 +857,9 @@ function makeStamp(accentColor, label) {
   if (!label) return '';
   var len = label.length;
   // Scale font size inversely with length
-  var fs = len <= 4 ? 62 : len <= 6 ? 52 : len <= 8 ? 44 : 36;
+  var fs = len <= 4 ? 34 : len <= 6 ? 27 : len <= 8 ? 22 : 17;
   // Position: lower-left area of main cert body, rotated
-  return '<g transform="translate(340,690) rotate(-28)" opacity="0.88">'+
+  return '<g transform="translate(645,715) rotate(-20)" opacity="0.88">'+
     '<circle cx="0" cy="0" r="92" fill="none" stroke="'+accentColor+'" stroke-width="5"/>'+
     '<circle cx="0" cy="0" r="82" fill="none" stroke="'+accentColor+'" stroke-width="1.5"/>'+
     '<circle cx="0" cy="0" r="86" fill="'+accentColor+'" fill-opacity="0.06"/>'+
@@ -534,34 +894,84 @@ function certSVG(d, qrUrl) {
     : '<text x="1064" y="524" text-anchor="middle" font-size="9" font-family="monospace" fill="#c0b8a8">QR PENDING</text>'+
       '<text x="1064" y="540" text-anchor="middle" font-size="8" font-family="monospace" fill="#d0c8b8">CLICK SAVE</text>';
 
-  var stampEl = (d.stamp && d.stamp.trim()) ? makeStamp(ac, d.stamp.trim().toUpperCase()) : '';
+  // stamp is rendered as draggable overlay, not in SVG template
+
+  // Border tick marks
+  var tks='';
+  for(var ti=130;ti<=1270;ti+=50){tks+='<line x1="'+ti+'" y1="26" x2="'+ti+'" y2="33" stroke="'+ac+'" stroke-width="0.7" opacity="0.38"/><line x1="'+ti+'" y1="867" x2="'+ti+'" y2="874" stroke="'+ac+'" stroke-width="0.7" opacity="0.38"/>';}
+  for(var ti2=130;ti2<=770;ti2+=50){tks+='<line x1="26" y1="'+ti2+'" x2="33" y2="'+ti2+'" stroke="'+ac+'" stroke-width="0.7" opacity="0.38"/><line x1="1367" y1="'+ti2+'" x2="1374" y2="'+ti2+'" stroke="'+ac+'" stroke-width="0.7" opacity="0.38"/>';}
+  // Guilloché wave paths
+  var gwT='M80,133',gwT2='M80,137',gwB='M80,795',gwB2='M80,799';
+  for(var gi=80;gi<1288;gi+=32){gwT+=' C'+(gi+8)+',127 '+(gi+24)+',139 '+(gi+32)+',133';gwT2+=' C'+(gi+8)+',131 '+(gi+24)+',143 '+(gi+32)+',137';gwB+=' C'+(gi+8)+',789 '+(gi+24)+',801 '+(gi+32)+',795';gwB2+=' C'+(gi+8)+',793 '+(gi+24)+',805 '+(gi+32)+',799';}
 
   return '<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">'+
 '<defs>'+
-'  <pattern id="cg" width="56" height="56" patternUnits="userSpaceOnUse">'+
-'    <path d="M0,28 Q14,0 28,28 T56,28" fill="none" stroke="#a09080" stroke-width="0.32"/>'+
-'    <path d="M0,14 Q14,42 28,14 T56,14" fill="none" stroke="#a09080" stroke-width="0.32"/>'+
-'  </pattern>'+
-'  <clipPath id="csc"><circle cx="1130" cy="308" r="84"/></clipPath>'+
-'  <path id="tbp" d="M 82 47 H 1318"/>'+
-'  <path id="bbp" d="M 82 856 H 1318"/>'+
-'  <path id="lbp" d="M 48 82 V 818"/>'+
-'  <path id="rbp" d="M 1352 82 V 818"/>'+
-'  <path id="srp" d="M1130,308 m-84,0 a84,84 0 1,1 168,0 a84,84 0 1,1-168,0"/>'+
-'  <path id="stp" d="M1067,308 A63,63 0 0,1 1193,308"/>'+
-'  <path id="sbp" d="M1067,308 A63,63 0 0,0 1193,308"/>'+
+'<pattern id="cg" width="56" height="56" patternUnits="userSpaceOnUse">'+
+'  <path d="M0,28 Q14,0 28,28 T56,28" fill="none" stroke="#a09080" stroke-width="0.32"/>'+
+'  <path d="M0,14 Q14,42 28,14 T56,14" fill="none" stroke="#a09080" stroke-width="0.32"/>'+
+'</pattern>'+
+'<pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(42)">'+
+'  <line x1="0" y1="0" x2="0" y2="6" stroke="#907060" stroke-width="0.17"/>'+
+'</pattern>'+
+'<pattern id="dotgrid" width="11" height="11" patternUnits="userSpaceOnUse">'+
+'  <circle cx="5.5" cy="5.5" r="0.42" fill="#8a7060"/>'+
+'</pattern>'+
+'<clipPath id="csc"><circle cx="1130" cy="308" r="84"/></clipPath>'+
+'<path id="tbp" d="M 82 47 H 1318"/>'+
+'<path id="bbp" d="M 82 856 H 1318"/>'+
+'<path id="lbp" d="M 48 82 V 818"/>'+
+'<path id="rbp" d="M 1352 82 V 818"/>'+
+'<path id="tibp" d="M 82 57 H 1318"/>'+
+'<path id="bibp" d="M 82 845 H 1318"/>'+
+'<path id="srp" d="M1130,308 m-84,0 a84,84 0 1,1 168,0 a84,84 0 1,1-168,0"/>'+
+'<path id="stp" d="M1067,308 A63,63 0 0,1 1193,308"/>'+
+'<path id="sbp" d="M1067,308 A63,63 0 0,0 1193,308"/>'+
+'<path id="mt1" d="M80,155 H1320"/><path id="mt2" d="M80,222 H1320"/>'+
+'<path id="mt3" d="M80,268 H1320"/><path id="mt4" d="M80,344 H1320"/>'+
+'<path id="mt5" d="M80,408 H1320"/><path id="mt6" d="M80,456 H1320"/>'+
+'<path id="mt7" d="M80,524 H1320"/><path id="mt8" d="M80,558 H1320"/>'+
+'<path id="mt9" d="M80,662 H1320"/><path id="mt10" d="M80,698 H1320"/>'+
+'<path id="mt11" d="M80,762 H1320"/><path id="mt12" d="M80,787 H1320"/>'+
+'<path id="mvt" d="M876,142 V848"/>'+
 '</defs>'+
 '<rect width="1400" height="900" fill="#f8f4e6"/>'+
 '<rect width="1400" height="900" fill="url(#cg)" opacity="0.13"/>'+
-'<text x="700" y="520" text-anchor="middle" font-size="195" font-family="serif" fill="'+ac+'" opacity="0.022" transform="rotate(-11,700,520)">GOV-MC</text>'+
+'<rect width="1400" height="900" fill="url(#hatch)" opacity="0.065"/>'+
+'<rect width="1400" height="900" fill="url(#dotgrid)" opacity="0.28"/>'+
+'<text x="700" y="530" text-anchor="middle" font-size="190" font-family="serif" fill="'+ac+'" opacity="0.02" transform="rotate(-11,700,530)">GOV-MC</text>'+
+'<text x="290" y="690" text-anchor="middle" font-size="82" font-family="serif" fill="'+ac+'" opacity="0.015" transform="rotate(-9,290,690)">VERIFIED</text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.046"><textPath href="#mt1">GOV-MC EXCHANGE AUTHORITY • AUTHORIZED TRADING INSTRUMENT • WGA OVERSIGHT • SERIES-1 • GOV-MC EXCHANGE AUTHORITY • AUTHORIZED TRADING INSTRUMENT • WGA OVERSIGHT • SERIES-1 • GOV-MC EXCHANGE AUTHORITY •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.04"><textPath href="#mt2">OFFICIAL IPO CERTIFICATE • TAMPER EVIDENT • RTDB VERIFIED • DO NOT REPRODUCE • WGA REG. COMPLIANCE • OFFICIAL IPO CERTIFICATE • TAMPER EVIDENT • RTDB VERIFIED • DO NOT REPRODUCE •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.046"><textPath href="#mt3">WGA • WEG • WBB • WLA • REGULATORY COMPLIANCE • GOV-MC EXCHANGE • AUTHORIZED INSTRUMENT • SERIES A • WGA • WEG • WBB • WLA • REGULATORY COMPLIANCE • GOV-MC EXCHANGE •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.04"><textPath href="#mt4">BLOCKCHAIN REGISTERED • TAMPER-EVIDENT RECORD • OFFICIAL INSTRUMENT • GOV-MC RTDB LIVE • BLOCKCHAIN REGISTERED • TAMPER-EVIDENT RECORD • OFFICIAL INSTRUMENT • GOV-MC •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.046"><textPath href="#mt5">SHARE ISSUANCE AUTHORIZED UNDER GOV-MC EXCHANGE REGULATION • SERIES A • IPO APPROVED • SHARE ISSUANCE AUTHORIZED UNDER GOV-MC EXCHANGE REGULATION • SERIES A •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.04"><textPath href="#mt6">GOV-MC EXCHANGE AUTHORITY • AUTHORIZED TRADING INSTRUMENT • WGA OVERSIGHT • SERIES-1 • GOV-MC EXCHANGE AUTHORITY • AUTHORIZED TRADING INSTRUMENT • WGA OVERSIGHT •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.046"><textPath href="#mt7">OFFICIAL IPO CERTIFICATE • TAMPER EVIDENT • RTDB VERIFIED • DO NOT REPRODUCE • OFFICIAL IPO CERTIFICATE • TAMPER EVIDENT • RTDB VERIFIED • DO NOT REPRODUCE •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.04"><textPath href="#mt8">CERTIFICATE AUTHENTICATED BY GOV-MC EXCHANGE SYSTEM • ALL RIGHTS RESERVED • WGA REGULATION • CERTIFICATE AUTHENTICATED BY GOV-MC EXCHANGE SYSTEM • ALL RIGHTS RESERVED •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.046"><textPath href="#mt9">WGA • WEG • WBB • WLA • REGULATORY COMPLIANCE • GOV-MC EXCHANGE • AUTHORIZED INSTRUMENT • WGA • WEG • WBB • WLA • REGULATORY COMPLIANCE REQUIRED •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.04"><textPath href="#mt10">BLOCKCHAIN REGISTERED • TAMPER-EVIDENT RECORD • OFFICIAL INSTRUMENT • GOV-MC • RTDB LIVE • BLOCKCHAIN REGISTERED • TAMPER-EVIDENT RECORD • OFFICIAL INSTRUMENT •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.046"><textPath href="#mt11">GOV-MC EXCHANGE AUTHORITY • AUTHORIZED TRADING INSTRUMENT • WGA OVERSIGHT • SERIES-1 • GOV-MC EXCHANGE AUTHORITY • AUTHORIZED TRADING INSTRUMENT • WGA OVERSIGHT •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.7" font-family="monospace" opacity="0.04"><textPath href="#mt12">OFFICIAL IPO CERTIFICATE • TAMPER EVIDENT • RTDB VERIFIED • DO NOT REPRODUCE • OFFICIAL IPO CERTIFICATE • TAMPER EVIDENT • RTDB VERIFIED • DO NOT REPRODUCE •</textPath></text>'+
+'<text font-size="4.5" fill="'+ac+'" letter-spacing="1.4" font-family="monospace" opacity="0.06"><textPath href="#mvt">GOV-MC • IPO • WGA • VERIFIED • AUTHORIZED • SERIES-1 • GOV-MC • IPO • WGA • VERIFIED • AUTHORIZED • SERIES-1 • GOV-MC • IPO • WGA • VERIFIED •</textPath></text>'+
 '<rect x="13" y="13" width="1374" height="874" fill="none" stroke="#1a1a1a" stroke-width="3.5" rx="2"/>'+
 '<rect x="26" y="26" width="1348" height="848" fill="none" stroke="'+ac+'" stroke-width="1.5"/>'+
 '<rect x="31" y="31" width="1338" height="838" fill="none" stroke="'+ac+'" stroke-width="0.5"/>'+
+tks+
+'<path d="'+gwT+'" fill="none" stroke="'+ac+'" stroke-width="0.65" opacity="0.28"/>'+
+'<path d="'+gwT2+'" fill="none" stroke="'+ac+'" stroke-width="0.45" opacity="0.18"/>'+
+'<path d="'+gwB+'" fill="none" stroke="'+ac+'" stroke-width="0.65" opacity="0.28"/>'+
+'<path d="'+gwB2+'" fill="none" stroke="'+ac+'" stroke-width="0.45" opacity="0.18"/>'+
 '<text font-size="6.5" fill="'+ac+'" letter-spacing="2.8" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#tbp">GOV-MC • VERIFIED • DO NOT DUPLICATE • TRACEABLE • AUTHORIZED IPO • GOV-MC • VERIFIED • DO NOT DUPLICATE • TRACEABLE •</textPath>'+
 '</text>'+
+'<text font-size="5" fill="'+ac+'" letter-spacing="2.5" font-family="monospace" opacity="0.32">'+
+'  <textPath href="#tibp">IPO AUTHORIZED • SERIES-1 • REGULATED • VERIFIABLE • EXCHANGE APPROVED • IPO AUTHORIZED • SERIES-1 • REGULATED • VERIFIABLE • EXCHANGE APPROVED •</textPath>'+
+'</text>'+
 '<text font-size="6.5" fill="'+ac+'" letter-spacing="2.8" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#bbp">AUTHORIZED IPO • GOV-MC EXCHANGE • OFFICIAL RECORD • VERIFIED INSTRUMENT • AUTHORIZED IPO • GOV-MC EXCHANGE •</textPath>'+
+'</text>'+
+'<text font-size="5" fill="'+ac+'" letter-spacing="2.5" font-family="monospace" opacity="0.32">'+
+'  <textPath href="#bibp">BLOCKCHAIN RECORD • TAMPER-PROOF • EXCHANGE VERIFIED • RTDB LIVE • BLOCKCHAIN RECORD • TAMPER-PROOF • EXCHANGE VERIFIED •</textPath>'+
 '</text>'+
 '<text font-size="6.5" fill="'+ac+'" letter-spacing="2" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#lbp">GOV-MC SECURITY • VERIFIED • GOV-MC SECURITY • VERIFIED • GOV-MC SECURITY •</textPath>'+
@@ -569,10 +979,50 @@ function certSVG(d, qrUrl) {
 '<text font-size="6.5" fill="'+ac+'" letter-spacing="2" font-family="monospace" opacity="0.55">'+
 '  <textPath href="#rbp">AUTHENTIC CERTIFICATE • DO NOT FORGE • AUTHENTIC CERTIFICATE • DO NOT FORGE •</textPath>'+
 '</text>'+
-'<text x="52" y="74" font-size="17" fill="'+ac+'" font-family="serif" opacity="0.65">✦</text>'+
-'<text x="1348" y="74" font-size="17" fill="'+ac+'" font-family="serif" text-anchor="end" opacity="0.65">✦</text>'+
-'<text x="52" y="855" font-size="17" fill="'+ac+'" font-family="serif" opacity="0.65">✦</text>'+
-'<text x="1348" y="855" font-size="17" fill="'+ac+'" font-family="serif" text-anchor="end" opacity="0.65">✦</text>'+
+'<g opacity="0.72">'+
+'  <circle cx="52" cy="62" r="11" fill="none" stroke="'+ac+'" stroke-width="0.8"/>'+
+'  <circle cx="52" cy="62" r="6" fill="none" stroke="'+ac+'" stroke-width="0.5"/>'+
+'  <line x1="36" y1="62" x2="42" y2="62" stroke="'+ac+'" stroke-width="1"/><line x1="62" y1="62" x2="68" y2="62" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="52" y1="46" x2="52" y2="52" stroke="'+ac+'" stroke-width="1"/><line x1="52" y1="72" x2="52" y2="78" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="44" y1="54" x2="47" y2="57" stroke="'+ac+'" stroke-width="0.6"/><line x1="57" y1="54" x2="60" y2="57" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <line x1="44" y1="70" x2="47" y2="67" stroke="'+ac+'" stroke-width="0.6"/><line x1="57" y1="67" x2="60" y2="70" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <polygon points="52,58 56,62 52,66 48,62" fill="'+ac+'" opacity="0.85"/>'+
+'  <circle cx="52" cy="47" r="1.3" fill="'+ac+'"/><circle cx="52" cy="77" r="1.3" fill="'+ac+'"/>'+
+'  <circle cx="37" cy="62" r="1.3" fill="'+ac+'"/><circle cx="67" cy="62" r="1.3" fill="'+ac+'"/>'+
+'</g>'+
+'<g opacity="0.72">'+
+'  <circle cx="1348" cy="62" r="11" fill="none" stroke="'+ac+'" stroke-width="0.8"/>'+
+'  <circle cx="1348" cy="62" r="6" fill="none" stroke="'+ac+'" stroke-width="0.5"/>'+
+'  <line x1="1332" y1="62" x2="1338" y2="62" stroke="'+ac+'" stroke-width="1"/><line x1="1358" y1="62" x2="1364" y2="62" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="1348" y1="46" x2="1348" y2="52" stroke="'+ac+'" stroke-width="1"/><line x1="1348" y1="72" x2="1348" y2="78" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="1340" y1="54" x2="1343" y2="57" stroke="'+ac+'" stroke-width="0.6"/><line x1="1353" y1="54" x2="1356" y2="57" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <line x1="1340" y1="70" x2="1343" y2="67" stroke="'+ac+'" stroke-width="0.6"/><line x1="1353" y1="67" x2="1356" y2="70" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <polygon points="1348,58 1352,62 1348,66 1344,62" fill="'+ac+'" opacity="0.85"/>'+
+'  <circle cx="1348" cy="47" r="1.3" fill="'+ac+'"/><circle cx="1348" cy="77" r="1.3" fill="'+ac+'"/>'+
+'  <circle cx="1333" cy="62" r="1.3" fill="'+ac+'"/><circle cx="1363" cy="62" r="1.3" fill="'+ac+'"/>'+
+'</g>'+
+'<g opacity="0.72">'+
+'  <circle cx="52" cy="838" r="11" fill="none" stroke="'+ac+'" stroke-width="0.8"/>'+
+'  <circle cx="52" cy="838" r="6" fill="none" stroke="'+ac+'" stroke-width="0.5"/>'+
+'  <line x1="36" y1="838" x2="42" y2="838" stroke="'+ac+'" stroke-width="1"/><line x1="62" y1="838" x2="68" y2="838" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="52" y1="822" x2="52" y2="828" stroke="'+ac+'" stroke-width="1"/><line x1="52" y1="848" x2="52" y2="854" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="44" y1="830" x2="47" y2="833" stroke="'+ac+'" stroke-width="0.6"/><line x1="57" y1="830" x2="60" y2="833" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <line x1="44" y1="846" x2="47" y2="843" stroke="'+ac+'" stroke-width="0.6"/><line x1="57" y1="843" x2="60" y2="846" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <polygon points="52,834 56,838 52,842 48,838" fill="'+ac+'" opacity="0.85"/>'+
+'  <circle cx="52" cy="823" r="1.3" fill="'+ac+'"/><circle cx="52" cy="853" r="1.3" fill="'+ac+'"/>'+
+'  <circle cx="37" cy="838" r="1.3" fill="'+ac+'"/><circle cx="67" cy="838" r="1.3" fill="'+ac+'"/>'+
+'</g>'+
+'<g opacity="0.72">'+
+'  <circle cx="1348" cy="838" r="11" fill="none" stroke="'+ac+'" stroke-width="0.8"/>'+
+'  <circle cx="1348" cy="838" r="6" fill="none" stroke="'+ac+'" stroke-width="0.5"/>'+
+'  <line x1="1332" y1="838" x2="1338" y2="838" stroke="'+ac+'" stroke-width="1"/><line x1="1358" y1="838" x2="1364" y2="838" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="1348" y1="822" x2="1348" y2="828" stroke="'+ac+'" stroke-width="1"/><line x1="1348" y1="848" x2="1348" y2="854" stroke="'+ac+'" stroke-width="1"/>'+
+'  <line x1="1340" y1="830" x2="1343" y2="833" stroke="'+ac+'" stroke-width="0.6"/><line x1="1353" y1="830" x2="1356" y2="833" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <line x1="1340" y1="846" x2="1343" y2="843" stroke="'+ac+'" stroke-width="0.6"/><line x1="1353" y1="843" x2="1356" y2="846" stroke="'+ac+'" stroke-width="0.6"/>'+
+'  <polygon points="1348,834 1352,838 1348,842 1344,838" fill="'+ac+'" opacity="0.85"/>'+
+'  <circle cx="1348" cy="823" r="1.3" fill="'+ac+'"/><circle cx="1348" cy="853" r="1.3" fill="'+ac+'"/>'+
+'  <circle cx="1333" cy="838" r="1.3" fill="'+ac+'"/><circle cx="1363" cy="838" r="1.3" fill="'+ac+'"/>'+
+'</g>'+
 '<text x="700" y="86" text-anchor="middle" font-size="35" font-family="serif" fill="#1a1a1a" letter-spacing="4">OFFICIAL STOCK CERTIFICATE</text>'+
 '<text x="700" y="111" text-anchor="middle" font-size="11.5" font-family="sans-serif" fill="'+ac+'" letter-spacing="3.5">GOVERNMENT VERIFIED MARKET INSTRUMENT</text>'+
 '<line x1="80" y1="126" x2="1320" y2="126" stroke="'+ac+'" stroke-width="2"/>'+
@@ -608,7 +1058,6 @@ function certSVG(d, qrUrl) {
 '<text x="90" y="687" font-size="10.5" font-family="sans-serif" fill="#888">Authorized Signatory — GOV-MC Exchange Authority</text>'+
 '<line x1="90" y1="730" x2="430" y2="730" stroke="#1a1a1a" stroke-width="0.9"/>'+
 '<text x="90" y="747" font-size="10.5" font-family="sans-serif" fill="#888">Corporate Registrar</text>'+
-stampEl+
 '<text x="1130" y="162" text-anchor="middle" font-size="9" font-family="sans-serif" fill="'+ac+'" letter-spacing="3" font-weight="bold">OFFICIAL SEAL</text>'+
 '<circle cx="1130" cy="308" r="100" fill="none" stroke="'+ac+'" stroke-width="2"/>'+
 '<circle cx="1130" cy="308" r="88" fill="none" stroke="'+ac+'" stroke-width="1"/>'+
