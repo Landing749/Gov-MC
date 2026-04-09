@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GOV-MC — Registration Certificate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --accent:#2c3e50;--accent2:#1a2838;--accent-light:rgba(44,62,80,.07);
+  --cream:#f8f4e6;--border:#e0d4c4;--bg:#eee9df;
+  --sidebar:#fff;--card:#fafaf8;
+  --text:#1a1208;--muted:#7a6f5e;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* NAV */
+.nav{background:var(--accent);color:#fff;height:56px;display:flex;align-items:center;padding:0 28px;gap:16px;position:sticky;top:0;z-index:200;box-shadow:0 2px 20px rgba(0,0,0,.3);}
+.nav-logo{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;letter-spacing:6px}
+.nav-sep{width:1px;height:28px;background:rgba(255,255,255,.2)}
+.nav-sub{font-size:10px;letter-spacing:3px;opacity:.6;text-transform:uppercase;font-weight:500}
+.nav-sp{flex:1}
+.nav-pill{font-size:9px;font-weight:600;background:rgba(255,255,255,.12);padding:5px 13px;border-radius:20px;letter-spacing:2px;border:1px solid rgba(255,255,255,.18);text-transform:uppercase;}
+.nav-link{font-size:10px;color:rgba(255,255,255,.7);text-decoration:none;letter-spacing:.8px;padding:5px 13px;border-radius:6px;transition:all .15s;font-weight:500;}
+.nav-link:hover{background:rgba(255,255,255,.1);color:#fff}
+
+/* LAYOUT */
+.layout{display:flex;height:calc(100vh - 56px)}
+
+/* SIDEBAR */
+.fp{width:320px;min-width:320px;background:var(--sidebar);border-right:1.5px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;}
+.fp::-webkit-scrollbar{width:4px}
+.fp::-webkit-scrollbar-thumb{background:#ddd;border-radius:2px}
+.fp-inner{padding:24px 20px;flex:1}
+.slabel{font-size:9px;font-weight:700;letter-spacing:3.5px;text-transform:uppercase;color:var(--accent);margin:24px 0 14px;display:flex;align-items:center;gap:10px;}
+.slabel:first-child{margin-top:0}
+.slabel-icon{font-size:13px}
+.slabel::after{content:'';flex:1;height:1px;background:var(--border)}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10.5px;font-weight:600;color:var(--muted);margin-bottom:6px;letter-spacing:.4px;}
+.field input,.field select{width:100%;padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;border:1.5px solid var(--border);border-radius:8px;background:var(--card);outline:none;transition:border-color .15s,box-shadow .15s;color:var(--text);}
+.field input:focus,.field select:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-light);}
+.field input[type="date"]{color:var(--muted)}
+.certid-row{display:flex;gap:8px;align-items:flex-end}
+.certid-row .field{flex:1;margin-bottom:0}
+.btn-gen{padding:9px 11px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:8px;font-size:10px;font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap;letter-spacing:.5px;transition:all .15s;height:38px;}
+.btn-gen:hover{background:#f0f4f8}
+
+/* STATUS BADGE */
+.status-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;}
+.status-btn{padding:5px 11px;border-radius:6px;border:1.5px solid var(--border);background:transparent;font-size:10px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:1px;color:var(--muted);transition:all .15s;}
+.status-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.status-btn:hover:not(.active){background:#f5f0ea}
+
+/* E-SIG */
+.sig-upload-row{display:flex;gap:8px;margin-bottom:12px;}
+.sig-upload-btn{flex:1;padding:9px 8px;border:1.5px dashed var(--border);border-radius:8px;background:var(--card);cursor:pointer;font-size:10.5px;font-weight:600;color:var(--muted);text-align:center;transition:all .15s;font-family:'DM Sans',sans-serif;}
+.sig-upload-btn:hover{border-color:var(--accent);color:var(--accent);background:#f0f4f8;}
+.sig-upload-btn.has-sig{border-color:var(--accent);background:#f0f4f8;color:var(--accent);}
+.sig-hint{font-size:10px;color:#bbb;line-height:1.5;margin-bottom:8px;}
+
+/* ACTIONS */
+.fp-actions{padding:16px 20px;border-top:1.5px solid var(--border);display:flex;flex-direction:column;gap:8px;background:var(--card);}
+.btn{padding:11px 14px;border:none;border-radius:8px;font-size:12.5px;font-family:'DM Sans',sans-serif;font-weight:600;cursor:pointer;letter-spacing:.4px;transition:all .15s;text-align:center;}
+.btn-pri{background:var(--accent);color:#fff;box-shadow:0 2px 10px rgba(0,0,0,.2);}
+.btn-pri:hover{background:var(--accent2);transform:translateY(-1px);}
+.btn-out{background:transparent;color:var(--accent);border:1.5px solid var(--accent);}
+.btn-out:hover{background:rgba(0,0,0,.03)}
+.dl-row{display:flex;gap:6px}
+.dl-row .btn-out{flex:1;font-size:11.5px;padding:9px 8px}
+
+/* PREVIEW */
+.prev{flex:1;overflow:auto;padding:28px;display:flex;flex-direction:column;align-items:center;gap:16px;background:var(--bg);}
+.prev-topbar{display:flex;align-items:center;gap:12px;width:100%;max-width:1000px}
+.prev-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:#999;font-weight:700}
+.prev-badge{font-size:9px;background:rgba(44,62,80,.1);color:var(--accent);padding:3px 11px;border-radius:12px;letter-spacing:1.5px;font-weight:700;}
+.cert-wrap{background:#fff;border-radius:8px;box-shadow:0 8px 48px rgba(0,0,0,.16),0 2px 8px rgba(0,0,0,.06);width:100%;max-width:1000px;overflow:hidden;position:relative;}
+.cert-wrap svg{width:100%;height:auto;display:block}
+.prev-hint{font-size:11px;color:#bbb;letter-spacing:.5px;margin-top:2px}
+
+/* SIG OVERLAY */
+#sig-overlay{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:10;}
+.sig-item{position:absolute;pointer-events:all;cursor:grab;user-select:none;-webkit-user-select:none;transform-origin:top left;}
+.sig-item:active{cursor:grabbing;}
+.sig-item img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none;}
+.sig-item .sig-toolbar{position:absolute;top:-22px;left:0;display:flex;gap:3px;opacity:0;transition:opacity .15s;pointer-events:all;}
+.sig-item:hover .sig-toolbar{opacity:1;}
+.sig-tbtn{background:rgba(30,30,30,.82);color:#fff;border:none;font-size:9px;padding:3px 7px;border-radius:4px;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.sig-tbtn:hover{background:#000;}
+.sig-resize{position:absolute;bottom:-6px;right:-6px;width:14px;height:14px;background:var(--accent);border-radius:50%;cursor:se-resize;pointer-events:all;}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <span class="nav-logo">GOV-MC</span>
+  <div class="nav-sep"></div>
+  <span class="nav-sub">Registry</span>
+  <div class="nav-sp"></div>
+  <a class="nav-link" href="govmc-issue.html">📄 IPO Issue</a>
+  <a class="nav-link" href="govmc-verify.html">🔍 Verify</a>
+  <span class="nav-pill">Registration</span>
+</nav>
+
+<div class="layout">
+  <!-- FORM PANEL -->
+  <div class="fp">
+    <div class="fp-inner">
+
+      <div class="slabel"><span class="slabel-icon">🏢</span> Corporation Details</div>
+      <div class="field">
+        <label>Corporation Name</label>
+        <input type="text" id="f-corp" placeholder="e.g. Redstone Industries" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>CEO / Registered Owner</label>
+        <input type="text" id="f-ceo" placeholder="e.g. Steve Diamond" oninput="updatePreview()">
+      </div>
+
+      <div class="slabel"><span class="slabel-icon">📋</span> Registration Info</div>
+      <div class="certid-row">
+        <div class="field">
+          <label>Registration ID</label>
+          <input type="text" id="f-regid" placeholder="GMC-REG-0001" oninput="updatePreview()">
+        </div>
+        <button class="btn-gen" onclick="autoGenRegId()">↻ Auto</button>
+      </div>
+      <div id="regid-hint" style="font-size:10.5px;color:#aaa;margin-top:5px;margin-bottom:10px;"></div>
+      <div class="field">
+        <label>Date Registered</label>
+        <input type="date" id="f-date" oninput="updatePreview()">
+      </div>
+      <div class="field">
+        <label>Registry Officer (Name)</label>
+        <input type="text" id="f-officer" placeholder="e.g. WGA Registry Office" oninput="updatePreview()">
+      </div>
+
+      <div class="slabel"><span class="slabel-icon">🏷️</span> Status</div>
+      <div class="status-row">
+        <button class="status-btn active" onclick="setStatus('REGISTERED')">REGISTERED</button>
+        <button class="status-btn" onclick="setStatus('PENDING')">PENDING</button>
+        <button class="status-btn" onclick="setStatus('SUSPENDED')">SUSPENDED</button>
+      </div>
+
+      <div class="slabel"><span class="slabel-icon">✍️</span> E-Signatures</div>
+      <div class="sig-hint">Upload a signature image. Drag to reposition over the signing line, resize from the corner dot.</div>
+      <div class="sig-upload-row">
+        <label class="sig-upload-btn" id="sig1-btn">
+          ✍ Signature<br><span style="font-size:9px;font-weight:400">Registry Officer</span>
+          <input type="file" accept="image/*" style="display:none" onchange="handleSigUpload('sig1',this)">
+        </label>
+      </div>
+      <div id="sig-clear-row" style="display:none;margin-bottom:12px;">
+        <button class="btn-gen" style="width:100%;font-size:10px;" onclick="clearAllSigs()">🗑 Clear Signature</button>
+      </div>
+
+    </div>
+
+    <div class="fp-actions">
+      <div class="dl-row">
+        <button class="btn btn-out" onclick="downloadSVG()">⬇ SVG</button>
+        <button class="btn btn-out" onclick="downloadRaster('png')">⬇ PNG</button>
+        <button class="btn btn-out" onclick="downloadRaster('jpg')">⬇ JPG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PREVIEW PANEL -->
+  <div class="prev">
+    <div class="prev-topbar">
+      <span class="prev-title">📋 Live Preview</span>
+      <span class="prev-badge">REAL-TIME</span>
+    </div>
+    <div class="cert-wrap">
+      <div id="cert-container"></div>
+      <div id="sig-overlay"></div>
+    </div>
+    <div class="prev-hint">Fill in the form to update the certificate in real time</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<script>
+const app = firebase.initializeApp({
+  apiKey:"AIzaSyCxylDmL0gBJsPGeKG8rLbvDWphbaDAIvk",
+  authDomain:"minecraft-server-ce7fb.firebaseapp.com",
+  databaseURL:"https://minecraft-server-ce7fb-default-rtdb.firebaseio.com",
+  projectId:"minecraft-server-ce7fb",
+  storageBucket:"minecraft-server-ce7fb.firebasestorage.app",
+  messagingSenderId:"887361447311",
+  appId:"1:887361447311:web:7e6d46c1897f651b5a97fa"
+});
+const db = firebase.database();
+
+var currentStatus = 'REGISTERED';
+function setStatus(s) {
+  currentStatus = s;
+  document.querySelectorAll('.status-btn').forEach(function(b){ b.classList.toggle('active', b.textContent===s); });
+  updatePreview();
+}
+
+async function autoGenRegId() {
+  var hint = document.getElementById('regid-hint');
+  hint.textContent = 'Checking records…'; hint.style.color = '#e65100';
+  try {
+    var snap = await db.ref('registrations').once('value');
+    var keys = snap.exists() ? Object.keys(snap.val()) : [];
+    var used = new Set();
+    keys.forEach(function(k){ var m=k.match(/^GMC-REG-(\d+)$/i); if(m)used.add(parseInt(m[1],10)); });
+    var next=1; while(used.has(next))next++;
+    var newId = 'GMC-REG-'+String(next).padStart(4,'0');
+    document.getElementById('f-regid').value = newId; updatePreview();
+    hint.textContent = '✓ Generated ('+keys.length+' existing)'; hint.style.color='#388e3c';
+  } catch(e){ hint.textContent='⚠ DB error: '+e.message; hint.style.color='#c62828'; }
+}
+
+function x(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function getData() {
+  return {
+    corp: document.getElementById('f-corp').value.trim(),
+    ceo:  document.getElementById('f-ceo').value.trim(),
+    regid: document.getElementById('f-regid').value.trim(),
+    date: document.getElementById('f-date').value.trim(),
+    officer: document.getElementById('f-officer').value.trim(),
+    status: currentStatus,
+  };
+}
+
+// ── SVG TEMPLATE ─────────────────────────────────────────
+function certSVG(d) {
+  var corp    = x(d.corp    || '[CORPORATION NAME]');
+  var ceo     = x(d.ceo     || '[CEO NAME]');
+  var regid   = x(d.regid   || 'GMC-REG-XXXX');
+  var date    = x(d.date    || '[DATE]');
+  var officer = x(d.officer || 'Registry Officer (WGA / WEG Authority)');
+  var status  = x(d.status  || 'REGISTERED');
+
+  // Build microtext string using the registration ID repeated
+  var idMT = '';
+  for(var i=0;i<12;i++) idMT += regid + ' • ';
+
+  // Status color
+  var stColor = status === 'REGISTERED' ? '#1b6e2a' : status === 'PENDING' ? '#8a6800' : '#c62828';
+  var stBg    = status === 'REGISTERED' ? '#e8f5e9' : status === 'PENDING' ? '#fffde7' : '#ffebee';
+
+  // Border tick marks
+  var tks = '';
+  for(var ti=120;ti<=1280;ti+=50){
+    tks += '<line x1="'+ti+'" y1="20" x2="'+ti+'" y2="28" stroke="#2c3e50" stroke-width="0.7" opacity="0.3"/>';
+    tks += '<line x1="'+ti+'" y1="872" x2="'+ti+'" y2="880" stroke="#2c3e50" stroke-width="0.7" opacity="0.3"/>';
+  }
+  for(var ti2=80;ti2<=820;ti2+=50){
+    tks += '<line x1="20" y1="'+ti2+'" x2="28" y2="'+ti2+'" stroke="#2c3e50" stroke-width="0.7" opacity="0.3"/>';
+    tks += '<line x1="1372" y1="'+ti2+'" x2="1380" y2="'+ti2+'" stroke="#2c3e50" stroke-width="0.7" opacity="0.3"/>';
+  }
+
+  return '<svg viewBox="0 0 1400 900" xmlns="http://www.w3.org/2000/svg">'+
+'<defs>'+
+'<pattern id="paper" width="60" height="60" patternUnits="userSpaceOnUse">'+
+'  <path d="M0,30 Q15,0 30,30 T60,30" fill="none" stroke="#ccc" stroke-width="0.35"/>'+
+'</pattern>'+
+'<pattern id="dg" width="12" height="12" patternUnits="userSpaceOnUse">'+
+'  <circle cx="6" cy="6" r="0.4" fill="#8a7060"/>'+
+'</pattern>'+
+// Microtext paths — all four sides
+'<path id="topMT"    d="M 80 50 H 1320"/>'+
+'<path id="topMT2"   d="M 80 61 H 1320"/>'+
+'<path id="bottomMT" d="M 80 848 H 1320"/>'+
+'<path id="bottomMT2" d="M 80 837 H 1320"/>'+
+'<path id="leftMT"   d="M 50 820 V 80"/>'+
+'<path id="rightMT"  d="M 1350 80 V 820"/>'+
+'</defs>'+
+
+// Background
+'<rect width="1400" height="900" fill="#fdfbf5"/>'+
+'<rect width="1400" height="900" fill="url(#paper)" opacity="0.2"/>'+
+'<rect width="1400" height="900" fill="url(#dg)" opacity="0.22"/>'+
+
+// Watermark
+'<text x="700" y="490" text-anchor="middle" font-size="130" font-family="serif" fill="#2c3e50" opacity="0.025" transform="rotate(-5,700,490)">REGISTRY</text>'+
+
+// Borders
+'<rect x="13" y="13" width="1374" height="874" fill="none" stroke="#2c3e50" stroke-width="3" rx="2"/>'+
+'<rect x="28" y="28" width="1344" height="844" fill="none" stroke="#7f8c8d" stroke-width="1.2"/>'+
+'<rect x="34" y="34" width="1332" height="832" fill="none" stroke="#2c3e50" stroke-width="0.4" opacity="0.4"/>'+
+
+tks +
+
+// ── MICROTEXT USING REGISTRATION ID (all 4 sides) ──
+'<text font-size="5.5" fill="#2c3e50" letter-spacing="2.2" font-family="monospace" opacity="0.55">'+
+'  <textPath href="#topMT">'+idMT+'</textPath>'+
+'</text>'+
+'<text font-size="4.5" fill="#2c3e50" letter-spacing="1.8" font-family="monospace" opacity="0.3">'+
+'  <textPath href="#topMT2">GOV-MC REGISTRY • OFFICIAL RECORD • NOT A PUBLIC OFFERING • GOV-MC REGISTRY • OFFICIAL RECORD • NOT A PUBLIC OFFERING • GOV-MC REGISTRY • OFFICIAL RECORD • NOT A PUBLIC OFFERING •</textPath>'+
+'</text>'+
+'<text font-size="5.5" fill="#2c3e50" letter-spacing="2.2" font-family="monospace" opacity="0.55">'+
+'  <textPath href="#bottomMT">'+idMT+'</textPath>'+
+'</text>'+
+'<text font-size="4.5" fill="#2c3e50" letter-spacing="1.8" font-family="monospace" opacity="0.3">'+
+'  <textPath href="#bottomMT2">REGISTERED ENTITY • PRIVATE LISTING • NOT PUBLICLY TRADED • GOV-MC CORPORATE REGISTRY • REGISTERED ENTITY • PRIVATE LISTING • NOT PUBLICLY TRADED •</textPath>'+
+'</text>'+
+'<text font-size="5.5" fill="#2c3e50" letter-spacing="2" font-family="monospace" opacity="0.5">'+
+'  <textPath href="#leftMT">'+regid+' • '+regid+' • '+regid+' • '+regid+' • '+regid+' • '+regid+' • '+regid+' •</textPath>'+
+'</text>'+
+'<text font-size="5.5" fill="#2c3e50" letter-spacing="2" font-family="monospace" opacity="0.5">'+
+'  <textPath href="#rightMT">'+regid+' • '+regid+' • '+regid+' • '+regid+' • '+regid+' • '+regid+' • '+regid+' •</textPath>'+
+'</text>'+
+
+// ── HEADER ──
+'<rect x="80" y="75" width="1240" height="3" fill="#2c3e50" opacity="0.15"/>'+
+'<text x="700" y="130" text-anchor="middle" font-size="42" font-family="serif" fill="#2c3e50" letter-spacing="3">CERTIFICATE OF REGISTRATION</text>'+
+'<text x="700" y="163" text-anchor="middle" font-size="14" font-family="sans-serif" fill="#7f8c8d" letter-spacing="4">GOV-MC CORPORATE REGISTRY AUTHORITY</text>'+
+'<line x1="200" y1="180" x2="600" y2="180" stroke="#7f8c8d" stroke-width="0.7"/>'+
+'<line x1="800" y1="180" x2="1200" y2="180" stroke="#7f8c8d" stroke-width="0.7"/>'+
+'<circle cx="700" cy="180" r="4" fill="#2c3e50" opacity="0.4"/>'+
+
+// ── CERT ID badge top-right ──
+'<rect x="1050" y="90" width="280" height="38" fill="none" stroke="#2c3e50" stroke-width="0.8" rx="3" opacity="0.4"/>'+
+'<text x="1190" y="107" text-anchor="middle" font-size="8" font-family="monospace" fill="#7f8c8d" letter-spacing="2.5">REGISTRATION ID</text>'+
+'<text x="1190" y="122" text-anchor="middle" font-size="12" font-family="monospace" fill="#2c3e50" font-weight="bold" letter-spacing="2">'+regid+'</text>'+
+
+// ── CORP NAME ──
+'<text x="700" y="250" text-anchor="middle" font-size="36" font-family="serif" fill="#1a1a1a">'+corp+'</text>'+
+'<line x1="200" y1="268" x2="1200" y2="268" stroke="#c9b8a8" stroke-width="0.8"/>'+
+
+// ── LEGAL TEXT ──
+'<text x="120" y="320" font-size="16" font-family="serif" fill="#222">This document certifies that the entity named above has been duly registered within the</text>'+
+'<text x="120" y="346" font-size="16" font-family="serif" fill="#222">Gov-MC Corporate Registry under the authority of the governing systems and is hereby</text>'+
+'<text x="120" y="372" font-size="16" font-family="serif" fill="#222">recognized as a legally acknowledged organization permitted to operate within the server.</text>'+
+'<text x="120" y="410" font-size="16" font-family="serif" fill="#222">Registration confirms the reservation of the corporate name and the establishment of</text>'+
+'<text x="120" y="436" font-size="16" font-family="serif" fill="#222">a recognized entity. This certificate does not grant public trading rights, issuance of shares,</text>'+
+'<text x="120" y="462" font-size="16" font-family="serif" fill="#222">or financial legitimacy beyond basic recognition.</text>'+
+
+// ── DETAILS ──
+'<line x1="120" y1="485" x2="880" y2="485" stroke="#c9b8a8" stroke-width="0.7"/>'+
+'<text x="120" y="515" font-size="13" font-family="sans-serif" fill="#7f8c8d" letter-spacing="2.5" font-weight="600">REGISTERED OWNER / CHIEF EXECUTIVE OFFICER</text>'+
+'<text x="120" y="546" font-size="22" font-family="serif" fill="#1a1a1a" font-weight="bold">'+ceo+'</text>'+
+'<line x1="120" y1="564" x2="880" y2="564" stroke="#c9b8a8" stroke-width="0.7"/>'+
+
+'<text x="120" y="596" font-size="13" font-family="sans-serif" fill="#7f8c8d" letter-spacing="2.5" font-weight="600">ENTITY STATUS</text>'+
+'<rect x="120" y="608" width="220" height="30" fill="'+stBg+'" rx="4" stroke="'+stColor+'" stroke-width="1"/>'+
+'<text x="230" y="628" text-anchor="middle" font-size="13" font-family="sans-serif" fill="'+stColor+'" font-weight="700" letter-spacing="2">'+status+'</text>'+
+'<text x="360" y="628" font-size="13" font-family="serif" fill="#555">Private Entity (Not Publicly Listed)</text>'+
+
+'<line x1="120" y1="650" x2="880" y2="650" stroke="#c9b8a8" stroke-width="0.7"/>'+
+'<text x="120" y="680" font-size="13" font-family="sans-serif" fill="#7f8c8d" letter-spacing="2.5" font-weight="600">CERTIFICATE INFORMATION</text>'+
+'<text x="120" y="708" font-size="15" font-family="serif" fill="#666">Registration ID:</text>'+
+'<text x="310" y="708" font-size="15" font-family="monospace" fill="#1a1a1a" font-weight="bold">'+regid+'</text>'+
+'<text x="120" y="734" font-size="15" font-family="serif" fill="#666">Date Registered:</text>'+
+'<text x="310" y="734" font-size="15" font-family="serif" fill="#1a1a1a">'+date+'</text>'+
+'<text x="120" y="760" font-size="15" font-family="serif" fill="#666">Exchange:</text>'+
+'<text x="310" y="760" font-size="15" font-family="serif" fill="#1a1a1a">GOV-MC Corporate Registry</text>'+
+
+// ── SIGNATURE ──
+'<line x1="120" y1="800" x2="500" y2="800" stroke="#1a1a1a" stroke-width="0.9"/>'+
+'<text x="120" y="818" font-size="11" font-family="sans-serif" fill="#888">'+officer+'</text>'+
+
+// ── OFFICIAL SEAL (right side) ──
+'<text x="1050" y="540" text-anchor="middle" font-size="9" font-family="sans-serif" fill="#2c3e50" letter-spacing="3" font-weight="bold">OFFICIAL SEAL</text>'+
+'<circle cx="1050" cy="680" r="110" fill="none" stroke="#2c3e50" stroke-width="2"/>'+
+'<circle cx="1050" cy="680" r="96" fill="none" stroke="#2c3e50" stroke-width="1"/>'+
+'<circle cx="1050" cy="680" r="92" fill="#fdfbf5"/>'+
+'<circle cx="1050" cy="680" r="42" fill="none" stroke="#2c3e50" stroke-width="0.9"/>'+
+'<circle cx="1050" cy="680" r="36" fill="#2c3e50" opacity="0.06"/>'+
+'<text x="1050" y="674" text-anchor="middle" font-size="13" font-family="\'Courier New\',monospace" fill="#2c3e50" font-weight="bold" letter-spacing="1.5">GOV</text>'+
+'<text x="1050" y="692" text-anchor="middle" font-size="13" font-family="\'Courier New\',monospace" fill="#2c3e50" font-weight="bold" letter-spacing="1.5">MC</text>'+
+
+// Seal circular text (using inline textPath on arc)
+'<defs><path id="sealArc" d="M1050,680 m-88,0 a88,88 0 1,1 176,0 a88,88 0 1,1-176,0"/>'+
+'<path id="sealTop" d="M987,680 A63,63 0 0,1 1113,680"/>'+
+'<path id="sealBot" d="M987,680 A63,63 0 0,0 1113,680"/>'+
+'</defs>'+
+'<text font-size="7" fill="#2c3e50" letter-spacing="1.8" font-family="monospace">'+
+'  <textPath href="#sealArc">GOV-MC • REGISTRY • AUTHORIZED • OFFICIAL • GOV-MC • REGISTRY • AUTHORIZED •</textPath>'+
+'</text>'+
+'<text font-size="10" fill="#2c3e50" font-family="serif" font-weight="bold">'+
+'  <textPath href="#sealTop" startOffset="50%" text-anchor="middle">CORPORATE REGISTRY</textPath>'+
+'</text>'+
+'<text font-size="10" fill="#2c3e50" font-family="serif">'+
+'  <textPath href="#sealBot" startOffset="50%" text-anchor="middle">OFFICIAL RECORD</textPath>'+
+'</text>'+
+'<line x1="1050" y1="568" x2="1050" y2="578" stroke="#2c3e50" stroke-width="1.5"/>'+
+'<line x1="1050" y1="782" x2="1050" y2="792" stroke="#2c3e50" stroke-width="1.5"/>'+
+'<line x1="938" y1="680" x2="948" y2="680" stroke="#2c3e50" stroke-width="1.5"/>'+
+'<line x1="1152" y1="680" x2="1162" y2="680" stroke="#2c3e50" stroke-width="1.5"/>'+
+
+// Bottom bar
+'<rect x="80" y="830" width="1240" height="32" fill="#2c3e50" opacity="0.05" rx="2"/>'+
+'<text x="700" y="851" text-anchor="middle" font-size="9" font-family="monospace" fill="#2c3e50" letter-spacing="1.5">THIS CERTIFICATE IS ISSUED UNDER THE AUTHORITY OF THE GOV-MC REGISTRY SYSTEM • UNAUTHORIZED REPRODUCTION IS PROHIBITED</text>'+
+'</svg>';
+}
+
+// ── E-SIGNATURE ──────────────────────────────────────────
+var sigImages = { sig1: null };
+var SIG_DEFAULTS = { sig1: { svgX: 90, svgY: 730, svgW: 260, svgH: 80 } };
+var _dragState = null, _resizeState = null;
+
+function handleSigUpload(key, input) {
+  var file = input.files[0]; if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var d = SIG_DEFAULTS[key];
+    sigImages[key] = { dataUrl:e.target.result, svgX:d.svgX, svgY:d.svgY, svgW:d.svgW, svgH:d.svgH };
+    var btn = document.getElementById(key+'-btn');
+    btn.classList.add('has-sig'); btn.querySelector('span').textContent = '✓ Uploaded';
+    document.getElementById('sig-clear-row').style.display = 'block';
+    renderSigOverlays();
+  };
+  reader.readAsDataURL(file); input.value='';
+}
+
+function clearAllSigs() {
+  sigImages.sig1 = null;
+  var btn = document.getElementById('sig1-btn');
+  btn.classList.remove('has-sig'); btn.querySelector('span').textContent = 'Registry Officer';
+  document.getElementById('sig-clear-row').style.display = 'none';
+  renderSigOverlays();
+}
+
+function screenToSVGCoords(sx, sy) {
+  var svgEl = document.querySelector('#cert-container svg');
+  if(!svgEl) return {x:0,y:0};
+  var rect = svgEl.getBoundingClientRect();
+  return { x:(sx-rect.left)/rect.width*1400, y:(sy-rect.top)/rect.height*900 };
+}
+
+function renderSigOverlays() {
+  var overlay = document.getElementById('sig-overlay');
+  overlay.innerHTML = '';
+  ['sig1'].forEach(function(key) {
+    var sig = sigImages[key]; if(!sig) return;
+    var el = document.createElement('div');
+    el.className = 'sig-item'; el.dataset.key = key;
+    el.style.left  = (sig.svgX/1400*100)+'%';
+    el.style.top   = (sig.svgY/900*100)+'%';
+    el.style.width  = (sig.svgW/1400*100)+'%';
+    el.style.height = (sig.svgH/900*100)+'%';
+    el.innerHTML =
+      '<div class="sig-toolbar">'+
+        '<button class="sig-tbtn" onclick="clearAllSigs()">✕ Remove</button>'+
+        '<button class="sig-tbtn" onclick="resetSigPos(\''+key+'\')">⟲ Reset</button>'+
+      '</div>'+
+      '<img src="'+sig.dataUrl+'" draggable="false"/>'+
+      '<div class="sig-resize" data-key="'+key+'"></div>';
+    el.addEventListener('mousedown', function(e) {
+      if(e.target.classList.contains('sig-resize')||e.target.classList.contains('sig-tbtn')) return;
+      e.preventDefault();
+      var sc = screenToSVGCoords(e.clientX,e.clientY);
+      _dragState = {key:key,startX:sc.x,startY:sc.y,origX:sig.svgX,origY:sig.svgY};
+    });
+    el.querySelector('.sig-resize').addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      var sc = screenToSVGCoords(e.clientX,e.clientY);
+      _resizeState = {key:key,startX:sc.x,startY:sc.y,origW:sig.svgW,origH:sig.svgH};
+    });
+    overlay.appendChild(el);
+  });
+}
+
+document.addEventListener('mousemove', function(e) {
+  if(_dragState) {
+    var cur=screenToSVGCoords(e.clientX,e.clientY), k=_dragState.key, sig=sigImages[k]; if(!sig)return;
+    sig.svgX=_dragState.origX+(cur.x-_dragState.startX);
+    sig.svgY=_dragState.origY+(cur.y-_dragState.startY);
+    var el=document.querySelector('.sig-item[data-key="'+k+'"]');
+    if(el){el.style.left=(sig.svgX/1400*100)+'%';el.style.top=(sig.svgY/900*100)+'%';}
+  }
+  if(_resizeState) {
+    var cur2=screenToSVGCoords(e.clientX,e.clientY), k2=_resizeState.key, sig2=sigImages[k2]; if(!sig2)return;
+    sig2.svgW=Math.max(40,_resizeState.origW+(cur2.x-_resizeState.startX));
+    sig2.svgH=Math.max(20,_resizeState.origH+(cur2.y-_resizeState.startY));
+    var el2=document.querySelector('.sig-item[data-key="'+k2+'"]');
+    if(el2){el2.style.width=(sig2.svgW/1400*100)+'%';el2.style.height=(sig2.svgH/900*100)+'%';}
+  }
+});
+document.addEventListener('mouseup',function(){_dragState=null;_resizeState=null;});
+
+function resetSigPos(key) {
+  var d=SIG_DEFAULTS[key]; if(sigImages[key]){Object.assign(sigImages[key],d);}
+  renderSigOverlays();
+}
+
+function injectSigsIntoSVG(svgStr) {
+  var sigEls = '';
+  ['sig1'].forEach(function(key) {
+    var sig=sigImages[key]; if(!sig) return;
+    sigEls += '<image href="'+sig.dataUrl+'" x="'+Math.round(sig.svgX)+'" y="'+Math.round(sig.svgY)+'" width="'+Math.round(sig.svgW)+'" height="'+Math.round(sig.svgH)+'" preserveAspectRatio="xMidYMid meet"/>';
+  });
+  return sigEls ? svgStr.replace('</svg>', sigEls+'</svg>') : svgStr;
+}
+
+function updatePreview() {
+  document.getElementById('cert-container').innerHTML = certSVG(getData());
+  renderSigOverlays();
+}
+
+function downloadSVG() {
+  var d=getData(), svg=injectSigsIntoSVG(certSVG(d));
+  var b=new Blob([svg],{type:'image/svg+xml'}), u=URL.createObjectURL(b), a=document.createElement('a');
+  a.href=u; a.download=(d.regid||'registration')+'.svg'; a.click(); URL.revokeObjectURL(u);
+}
+function downloadRaster(format) {
+  var d=getData(), svgStr=injectSigsIntoSVG(certSVG(d));
+  var blob=new Blob([svgStr],{type:'image/svg+xml;charset=utf-8'}), url=URL.createObjectURL(blob);
+  var img=new Image();
+  img.onload=function(){
+    var sc=3, canvas=document.createElement('canvas');
+    canvas.width=1400*sc; canvas.height=900*sc;
+    var ctx=canvas.getContext('2d');
+    if(format==='jpg'){ctx.fillStyle='#fdfbf5';ctx.fillRect(0,0,canvas.width,canvas.height);}
+    ctx.scale(sc,sc); ctx.drawImage(img,0,0,1400,900); URL.revokeObjectURL(url);
+    var mime=format==='jpg'?'image/jpeg':'image/png', q=format==='jpg'?0.96:undefined;
+    canvas.toBlob(function(b2){var u2=URL.createObjectURL(b2),a=document.createElement('a');a.href=u2;a.download=(d.regid||'registration')+'.'+format;a.click();URL.revokeObjectURL(u2);},mime,q);
+  };
+  img.src=url;
+}
+
+// Init
+updatePreview();
+</script>
+</body>
+</html>
